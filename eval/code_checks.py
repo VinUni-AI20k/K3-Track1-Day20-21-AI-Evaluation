@@ -65,10 +65,24 @@ def check_quote_verbatim(rec, section_tokens):
     return True, None
 
 
+def check_followup_exists(rec, *args):
+    """Kiểm tra có đúng 3 câu hỏi gợi mở hay không."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    followups = out.get("followup_questions", [])
+    if not isinstance(followups, list):
+        return False, "followup_questions không phải dạng mảng"
+    if len(followups) != 3:
+        return False, f"có {len(followups)} câu hỏi, yêu cầu đúng 3 câu"
+    return True, None
+
+
 CHECKS = [  # thêm check của nhóm vào đây
     ("schema_valid", check_schema),
     ("citation_exists", check_citation_exists),
     ("quote_verbatim", check_quote_verbatim),
+    ("followup_exists", check_followup_exists),
 ]
 
 
@@ -90,6 +104,8 @@ def main(path="results.jsonl"):
                 ok, reason = fn(rec)
             elif fn is check_citation_exists:
                 ok, reason = fn(rec, valid_ids)
+            elif fn is check_followup_exists:
+                ok, reason = fn(rec)
             else:
                 ok, reason = fn(rec, section_tokens)
             if ok is None:
