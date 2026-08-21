@@ -314,54 +314,58 @@ chính là ranh giới giữa làn Code và làn Judge, đo được bằng số
   6 row chỉ fail ở C6 được chuyển về `pass` vì nằm ngoài phạm vi judge. So judge một
   tiêu chí với nhãn tổng là so nhầm chuẩn.
 
-#### Vòng 1 — `judge-prompt-v1.md` → `verdicts-v1.jsonl`
+#### Bốn vòng calibration
 
-```
-Confusion matrix (hàng = judge, cột = nhãn người):
-           |      pass      fail uncertain
-      pass |         8         1         0
-      fail |        12         8         1
- uncertain |         0         0         0
-Agreement: 16/30 = 53%
-```
+| Vòng | Thay đổi (đúng một thứ mỗi vòng) | Nhận đúng output **TỐT** | Bắt được output **XẤU** | Agreement |
+|---|---|---|---|---|
+| **v1** | Prompt gốc của nhóm: role + 1 câu hỏi chấm + 4 ví dụ near-miss | 8/20 = **40%** | 8/9 = **89%** | 16/30 = 53% |
+| **v2** | Thêm quy tắc "từ chối đúng cách = PASS" | 8/20 = 40% | 8/9 = 89% | 16/30 = 53% |
+| **v3** | Viết lại tiêu chí 3: chỉ FAIL khi answer **mâu thuẫn** quote, không FAIL vì "vắng mặt trong quote" | 11/20 = **55%** | 8/9 = 89% | 19/30 = **63%** |
+| **v4** | Đổi *harness* chứ không đổi prompt: đính kèm toàn văn section đã cite (`JUDGE_WITH_SECTIONS=1`) | 12/20 = **60%** | 7/9 = **78%** | 19/30 = 63% |
 
-**Hai con số đọc riêng:**
+Trần đồng thuận của con người: **50%**.
 
-| Câu hỏi | Kết quả |
-|---|---|
-| Trong 20 output thật sự **TỐT**, judge nhận đúng bao nhiêu? | **8/20 = 40%** → chặn nhầm 12 |
-| Trong 9 output thật sự **XẤU**, judge bắt được bao nhiêu? | **8/9 = 89%** → bỏ sót 1 |
+**Vòng 1 — chặt quá, không phải dễ quá.** Ngược với kỳ vọng thông thường (LLM mặc định
+dễ tính). Nguyên nhân: prompt v1 nhồi 4 ví dụ near-miss toàn kiểu "suýt đúng nhưng sai",
+làm judge nghiêng hẳn về phía bắt lỗi. Hai pattern lệch tách bạch được:
 
-**Judge của nhóm đang chặt quá, không phải dễ quá** — ngược với kỳ vọng thông thường
-của lab (LLM mặc định dễ tính). Nguyên nhân: prompt v1 nhồi 4 ví dụ near-miss toàn kiểu
-"suýt đúng nhưng sai", làm judge nghiêng hẳn về phía bắt lỗi.
-
-**Hai pattern lệch, tách bạch rõ:**
-
-| Pattern | Số ca | Ca đại diện | Chẩn đoán |
+| Pattern | Ca | Ví dụ | Chẩn đoán |
 |---|---|---|---|
-| **A. Phạt mọi diễn giải không nằm nguyên văn trong `quote`** | 7 | `sc-13` — answer viết "ví dụ, rubric có thể xác định độ chính xác trên 92%"; số 92% **có** trong section `ai-evals-m03#evaluation-rubric` đã cite, chỉ không nằm trong đoạn quote ngắn | **Lỗi thiết kế prompt.** `judge.py` chỉ đưa `quote` cho judge, không đưa toàn văn section — nhưng prompt v1 lại bắt đối chiếu với quote |
-| **B. Đánh trượt các ca TỪ CHỐI ĐÚNG** | 5 | `sc-17` — tutor trả `out_of_scope`, `sources=[]`, từ chối lịch sự; judge fail vì "không cung cấp thông tin nào từ corpus" | **Lỗ hổng logic prompt.** v1 không có một dòng nào nói từ chối đúng cách là hành vi ĐÚNG |
+| **A. Phạt mọi diễn giải không nằm nguyên văn trong `quote`** | 7 | `sc-13` — answer viết "ví dụ, rubric có thể xác định độ chính xác trên 92%". Số 92% **có thật** trong section `ai-evals-m03#evaluation-rubric` đã cite, chỉ không nằm trong đoạn quote ngắn | Lỗi thiết kế prompt: `build_judge_prompt` chỉ đưa `quote`, không đưa toàn văn section |
+| **B. Đánh trượt các ca TỪ CHỐI ĐÚNG** | 5 | `sc-17` — tutor trả `out_of_scope`, `sources=[]`, từ chối lịch sự; judge fail vì "không cung cấp thông tin nào từ corpus" | Lỗ hổng logic: v1 không có dòng nào nói từ chối là hành vi đúng |
 
-#### Vòng 2 — `judge-prompt-v2.md` (đã viết, **CHƯA CHẠY ĐƯỢC**)
+**Vòng 2 — bài học đắt nhất: con số tổng che mất cả cải thiện lẫn regression.**
+Agreement đứng yên 53%, nhìn qua tưởng thay đổi vô tác dụng. So từng dòng mới thấy
+**8 row đổi verdict**:
 
-Đổi **đúng một thứ** so với v1: thêm quy tắc "PASS bắt buộc — từ chối đúng cách", nhắm
-riêng pattern B. Dự kiến 5 ca chặn nhầm sẽ lật, kéo tỉ lệ nhận đúng output tốt từ
-40% lên khoảng 65%.
+- 4/5 ca từ chối đúng đã lật sang `pass` như thiết kế (sc-12, sc-16, sc-17, sc-28) ✅
+- Nhưng 4 row khác tụt từ `pass` xuống `fail` (sc-01, sc-08, sc-15, sc-21) ❌
 
-**Chưa có số liệu:** tài khoản OpenRouter hết credit giữa chừng — cả 30 request trả
-`HTTP 402 Payment Required`, verdicts vòng 2 không hợp lệ nên **không** đưa vào
-`evidence/`. Cần nạp credit rồi chạy lại `python3 eval/judge.py`.
+Hai chiều triệt tiêu nhau. Kiểm chứng đây là **tác dụng phụ của prompt chứ không phải
+nhiễu**: chạy lại 4 row đó 2 lần với v2 đều ra `fail`, chạy với v1 đều ra `pass` —
+ổn định tuyệt đối. Thủ phạm là câu thêm vào cuối v2 ("Tiêu chí 4 chỉ áp dụng khi tutor
+trả `in_scope`") vô tình khiến judge soi các câu `in_scope` gắt hơn.
 
-Vòng 3 dự kiến sẽ nhắm pattern A: đưa toàn văn section vào prompt judge, hoặc nới tiêu
-chí 3 để chấp nhận diễn giải và ví dụ minh hoạ.
+> Nếu chỉ nhìn agreement tổng, nhóm đã kết luận sai rằng v2 vô dụng và bỏ đi một sửa
+> đổi thật sự đúng.
 
-#### Trần đồng thuận
+**Vòng 3 — +10 điểm.** Nới tiêu chí 3 kéo tỉ lệ nhận đúng output tốt từ 40% lên 55%
+mà không mất chút nào khả năng bắt lỗi (giữ 89%). Đây là vòng hiệu quả nhất.
 
-Human–human agreement là **50%**. Judge vòng 1 đạt **53%** — tức judge đã ngang trần
-đồng thuận của chính con người ngay từ vòng đầu. Đây **không** phải tin tốt: nó nói
-rằng nhãn vàng cho C4+C5 còn chưa đủ nhất quán để làm chuẩn chặt. Muốn judge tốt hơn
-thì phải siết rubric trước, không phải siết prompt.
+**Vòng 4 — chạm trần.** 9 ca chặn nhầm còn lại đều có chung một rationale: *"không có
+trong đoạn trích nào"*. Đó không phải lỗi chữ nghĩa mà là giới hạn cấu trúc — judge
+không được xem toàn văn section nên **không có cách nào** phân biệt "tutor bịa" với
+"ý này nằm trong section nhưng ngoài đoạn quote". Nhóm thử sửa ở tầng harness thay vì
+prompt: đính kèm toàn văn section. Kết quả agreement **vẫn 63%**, chỉ đánh đổi
+chặn nhầm lấy bỏ sót (bắt lỗi tụt 89% → 78%).
+
+**Hai đòn bẩy khác nhau cùng dừng ở 63% → theo luật lab, đây là dấu hiệu chạm trần.**
+Ghi nhận và chuyển làn, không ép thêm vòng nữa. Judge đã vượt trần đồng thuận của con
+người (50%), nhưng vượt một trần thấp không có nghĩa là đủ tin để làm gate.
+
+**Bản chốt dùng cho Phase 5: v3** (`judge-prompt-v3.md`, không bật `JUDGE_WITH_SECTIONS`).
+Lý do: với vai trò cổng chất lượng, **bỏ sót lỗi nguy hiểm hơn chặn nhầm** — v3 giữ
+khả năng bắt lỗi 89% trong khi v4 tụt xuống 78%.
 
 ### Phần D — Verdict từng evaluator
 
@@ -384,27 +388,38 @@ cho nó lúc này chỉ ra một con số không kiểm chứng được.
 
 ## 6. Scorecard & Gate
 
-> Tổng hợp điểm theo rubric trên dataset v1, rồi ra quyết định gate như một PM thật.
+### 6.1 — Threshold chốt TRƯỚC khi xem số (khoá tại commit này)
 
-- Kết quả chạy `eval/run_eval.py` + `eval/judge.py` trên dataset v1: **pass rate** theo từng tiêu
-  chí là bao nhiêu? (kèm link/chỉ đường tới results.jsonl, verdicts.jsonl, report.html)
-- Chi phí 1 vòng eval là bao nhiêu ($, token)? Latency trung bình 1 câu?
-- **Gate**: ngưỡng nào thì ship? Ví dụ: groundedness pass ≥ 90%, không có fail nào ở
-  nhóm blocker... — định nghĩa ngưỡng của bạn và giải thích vì sao.
-- Kết quả hiện tại: **SHIP hay CHƯA SHIP**? Căn cứ vào gate ở trên.
-- Nếu chưa ship: 3 lỗi lớn nhất cần fix ở tutor (prompt, retrieval, corpus)?
+> Luật lab: *"Chốt threshold trước khi xem số liệu candidate. Quyết định sau khi thấy
+> số là thương lượng, không phải tiêu chuẩn."*
 
-### Scorecard
+**Khai báo trung thực về những gì nhóm ĐÃ biết lúc chốt ngưỡng.** Ngưỡng dưới đây được
+suy ra từ yêu cầu sản phẩm (học viên chịu được lỗi gì), nhưng nhóm không ở trạng thái mù
+hoàn toàn — trong lúc calibrate judge ở Phase 4 đã nhìn thấy:
 
-| Tiêu chí | Pass | Fail | Uncertain | Pass rate |
+- kết quả 5 code check (30/30, 30/30, 23/30, 30/30, 30/30);
+- các con số calibration của judge (agreement 53% → 63%).
+
+**Chưa hề tính lúc chốt ngưỡng:** pass rate theo slice, danh sách regression, và
+scorecard tổng — tức toàn bộ nội dung mục 6.2 phía dưới. Ngưỡng được commit riêng
+một lần, trước commit chứa 6.2, để đối chiếu được bằng `git log`.
+
+| # | Tiêu chí | Ngưỡng tối thiểu để SHIP | Vì sao đúng ngưỡng đó | Được trade off? |
 |---|---|---|---|---|
-| | | | | |
+| T1 | `schema_valid` | **100%** | Client parse JSON để render. Vỡ schema là hỏng giao diện, không phải giảm chất lượng | ❌ Không |
+| T2 | `citation_exists` | **100%** | Nguồn không tồn tại = học viên bấm vào không thấy gì. Đây là lời hứa sản phẩm "có nguồn tra được" | ❌ Không |
+| T3 | `quote_verbatim` (rule v2) | **≥ 95%** | Bịa trích dẫn phá huỷ niềm tin nhanh hơn mọi lỗi khác. Chừa 5% cho ca lược trích lắt léo | ❌ Không |
+| T4 | **0 ca bịa số liệu** (C4) | **0 ca tuyệt đối** | Học viên PM sẽ bê thẳng con số vào tài liệu của họ. Một con số bịa lan xa hơn một câu trả lời dở | ❌ Không |
+| T5 | Câu out-of-scope bị trả lời như thật (C5) | **≤ 10%** (≤ 1/12 câu) | Trả lời câu ngoài corpus = bịa có hệ thống. Chừa đúng 1 ca cho vùng xám "corpus phủ một phần" | ❌ Không |
+| T6 | Câu `unclear` được hỏi lại (C6) | **≥ 50%** | Ngưỡng thấp có chủ đích: đây là hành vi tutor chưa từng được dạy làm. Đặt 50% để đo tiến bộ, không phải để chặn ship | ✅ Có |
+| T7 | `followup_count` đúng 3 | **≥ 95%** | Ảnh hưởng trải nghiệm chứ không gây hại | ✅ Có |
+| T8 | Chi phí / câu | **≤ $0.02** | Ở quy mô lớp, trên mức này thì tính năng không kinh tế | ✅ Có |
 
-### Quyết định gate
+**Quy tắc gate:** fail bất kỳ ngưỡng nào trong nhóm **không được trade off**
+(T1–T5) ⇒ **HOLD**. Chỉ fail nhóm trade off được (T6–T8) ⇒ **Ship with conditions**.
 
-**SHIP / CHƯA SHIP** — vì: ...
-
----
+**Lưu ý cỡ mẫu:** dataset chỉ có 30 row, nên **1 row lật ≈ 3,3 điểm %**. Mọi chênh
+lệch dưới ~7 điểm % giữa hai version phải coi là nhiễu, không phải cải thiện.
 
 ## 7. Verdict + Report cuối
 

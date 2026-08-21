@@ -24,6 +24,10 @@ JUDGE_MODEL = os.environ.get("EVAL_JUDGE_MODEL", "openai/gpt-4o-mini")
 # judge_prompt.md nằm cạnh file này trong eval/ — resolve theo __file__, không theo cwd
 PROMPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "judge_prompt.md")
 
+# Toàn văn section, chỉ nạp khi JUDGE_WITH_SECTIONS=1 (xem build_judge_prompt)
+_SECTIONS = ({(x["doc_id"], x["section_id"]): x["text"] for x in tutor.load_corpus()}
+             if os.environ.get("JUDGE_WITH_SECTIONS") == "1" else {})
+
 def read_jsonl(path):
     if not os.path.exists(path):
         return []
@@ -46,8 +50,14 @@ def build_judge_prompt(rec, template):
     if rec.get("slide"):
         input_text = tutor.format_slide_context(rec["slide"]).strip() + "\n" + input_text
     answer = json.dumps(rec.get("output"), ensure_ascii=False, indent=2)
-    sources = json.dumps(rec.get("output", {}).get("sources", []),
-                         ensure_ascii=False, indent=2)
+    src_list = rec.get("output", {}).get("sources", [])
+    if os.environ.get("JUDGE_WITH_SECTIONS") == "1":
+        # Mặc định judge chỉ thấy đoạn quote NGẮN -> không thể phân biệt "tutor bịa"
+        # với "ý này nằm trong section nhưng ngoài đoạn quote". Bật cờ này để đính kèm
+        # toàn văn section đã cite, cho judge đủ dữ kiện đối chiếu.
+        src_list = [dict(x, section_text=_SECTIONS.get((x.get("doc_id"), x.get("section_id")), "")[:4000])
+                    for x in src_list]
+    sources = json.dumps(src_list, ensure_ascii=False, indent=2)
     return (template.replace("{{input}}", input_text)
                     .replace("{{answer}}", answer)
                     .replace("{{sources}}", sources))
