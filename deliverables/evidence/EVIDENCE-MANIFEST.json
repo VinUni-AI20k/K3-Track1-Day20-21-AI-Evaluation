@@ -30,13 +30,13 @@
       "row_count": 23
     },
     "deliverables/evidence/labels-followup-huy.csv": {
-      "sha256": "21a0ac45f262fc189833e9f3050eb259b6aa9f7661b4a0aeb10a7daf3d24fb0a",
-      "size_bytes": 2206,
+      "sha256": "b98bca9496280d0d70af23c1d6251774000d7c7e9e6f00bf8e27ae17c7bf4751",
+      "size_bytes": 2229,
       "row_count": 23
     },
     "deliverables/evidence/labels-followup-hue.csv": {
-      "sha256": "43e70fb706d4c264edc96a8e9b3faca452216b2434ac1a1135f18c9791fef0ac",
-      "size_bytes": 2313,
+      "sha256": "46ee052fe4ee483b02ff6bcd06dec016043a9a8652739889c7b274e53b3a98d0",
+      "size_bytes": 2336,
       "row_count": 23
     },
     "deliverables/evidence/labels-followup-gold.csv": {
@@ -89,6 +89,11 @@
       "size_bytes": 3191,
       "row_count": null
     },
+    "deliverables/evidence/final-provider-config-addendum.md": {
+      "sha256": "6ecdbb96cf6dbf2a3ad02be6ce698af44c6f2e51a28900a815c6f283fa3a4f81",
+      "size_bytes": 2270,
+      "row_count": null
+    },
     "deliverables/evidence/scorecard-final-real.md": {
       "sha256": "cc1b7a8977747fad9b416b6285a290bec17f08cb1addf618df4ac8213429b370",
       "size_bytes": 5965,
@@ -99,9 +104,9 @@
       "size_bytes": 5894,
       "row_count": null
     },
-    "deliverables/evidence/COACH-TWO-PERSON-WAIVER.md": {
-      "sha256": "e213357cb51176ce5d7236a1c4eda5c51da6f3a8a2ee05a614c79d518b95610a",
-      "size_bytes": 2506,
+    "deliverables/evidence/TWO-PERSON-TEAM-CONSTRAINT.md": {
+      "sha256": "bccea055fe9c22a64d2e47cba78b15ce39b12210fc8e86fd478816b66ca4b814",
+      "size_bytes": 2161,
       "row_count": null
     },
     "deliverables/evidence/HUMAN-LABEL-PROVENANCE.md": {
@@ -110,18 +115,18 @@
       "row_count": null
     },
     "deliverables/REPORT.md": {
-      "sha256": "65dad4866ba492226a4b60c1a5a80da7ff7e8708072ea23850e76291eb267f3e",
-      "size_bytes": 19615,
+      "sha256": "43c035f23890561eb395b1b9c9f7b8753910f41702072c2684fc6becc5474ddd",
+      "size_bytes": 18686,
       "row_count": null
     },
     "ai-support-log.md": {
-      "sha256": "f4ccf2099695cd9e67285c077db37b237b605fe332f203e44669a275be63e709",
-      "size_bytes": 5341,
+      "sha256": "81c51f10367c021c8f7d8dab7ef30065069c732ae1cbd88cc1ca0aed2473a498",
+      "size_bytes": 5348,
       "row_count": null
     },
     "README.md": {
-      "sha256": "7f00aff73a5326c0d58f6348315d947b8eb619ea2a10ac9638c40a8e1a016618",
-      "size_bytes": 13911,
+      "sha256": "513903f4c319671124877d26b533063e30b1e83a213501ff12686486696dcd70",
+      "size_bytes": 14215,
       "row_count": null
     }
   }

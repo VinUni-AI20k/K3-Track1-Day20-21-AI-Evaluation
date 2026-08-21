@@ -11,8 +11,8 @@
 ## 1. AI ĐÃ GIÚP TÔI Ở ĐÂU? (WHERE AI ASSISTED)
 
 1. **Khảo sát mã nguồn & Tự động hóa kiểm thử (Phase 0)**:
-   - AI hỗ trợ viết bộ kiểm thử mở rộng 23 unit tests cho hệ thống deterministic code checks (`tests/test_code_checks.py`), đồng thời kiểm kê 341 sections từ 18 tài liệu markdown của corpus.
-   - Hỗ trợ xây dựng script kiểm tra tự động `scripts/validate_all.ps1` để chạy nhanh toàn bộ regression suite.
+   - AI hỗ trợ viết bộ kiểm thử mở rộng 27 unit tests cho hệ thống deterministic code checks (`tests/test_code_checks.py`), đồng thời kiểm kê 341 sections từ 18 tài liệu markdown của corpus.
+   - Hỗ trợ xây dựng script kiểm tra tự động `scripts/validate_submission.ps1` để chạy nhanh toàn bộ regression suite.
 
 2. **Khởi tạo dữ liệu kiểm thử (Phase 1)**:
    - AI hỗ trợ sinh các câu hỏi mô phỏng người học (simulated queries) dựa trên 15 tổ hợp dimensions do tôi định nghĩa, giúp tiết kiệm thời gian gõ văn bản mẫu.
@@ -54,4 +54,4 @@
    - Tôi quyết định các ngưỡng chặn phát hành tại `deliverables/evidence/thresholds-locked.md` (100% schema, 95% citation, 90% quote, >=85% IAA, >=85% Judge agreement) trước khi chạy Candidate v3.
 
 4. **Phê duyệt Quyết định Phát hành Cuối cùng (Release Verdict)**:
-   - Dựa trên bằng chứng thực tế từ 14 lát cắt dữ liệu, 44 tests eval-kit pass, 23 code checks unit tests pass, 2 tiêu chí judge được hiệu chuẩn 2 vòng, và kiểm toán 4 ca phân kỳ tag phạm vi, tôi chính thức ký duyệt quyết định **`SHIP with documented scope-tag divergence`** cho VLearn AI Tutor.
+   - Dựa trên bằng chứng thực tế từ 14 lát cắt dữ liệu, 44 tests eval-kit pass, 27 code checks unit tests pass, 2 tiêu chí judge được hiệu chuẩn 2 vòng, và kiểm toán 4 ca phân kỳ tag phạm vi, tôi chính thức ký duyệt quyết định **`SHIP with documented scope-tag divergence`** cho VLearn AI Tutor.

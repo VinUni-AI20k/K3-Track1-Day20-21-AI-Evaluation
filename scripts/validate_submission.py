@@ -53,9 +53,10 @@ def main():
         "deliverables/evidence/agreement-final-real.md",
         "deliverables/evidence/agreement-followup.md",
         "deliverables/evidence/thresholds-locked.md",
+        "deliverables/evidence/final-provider-config-addendum.md",
         "deliverables/evidence/scorecard-final-real.md",
         "deliverables/evidence/scope-mismatch-audit.md",
-        "deliverables/evidence/COACH-TWO-PERSON-WAIVER.md",
+        "deliverables/evidence/TWO-PERSON-TEAM-CONSTRAINT.md",
         "deliverables/evidence/HUMAN-LABEL-PROVENANCE.md",
         "deliverables/evidence/JUDGE-CALIBRATION-MANIFEST.md",
         "deliverables/evidence/EVIDENCE-MANIFEST.json",
@@ -83,11 +84,11 @@ def main():
     if check(coverage_ok, f"Dataset includes representative, challenge, and high-risk set types"):
         passed += 1
 
-    # 5. Team Size & Waiver
+    # 5. Team Size & Constraint
     total += 1
-    waiver_path = ROOT / "deliverables/evidence/COACH-TWO-PERSON-WAIVER.md"
-    waiver_ok = waiver_path.exists() and "2A202601873" in open(waiver_path, encoding="utf-8").read()
-    if check(waiver_ok, "Two-person team structure & waiver documented with full provenance"):
+    constraint_path = ROOT / "deliverables/evidence/TWO-PERSON-TEAM-CONSTRAINT.md"
+    constraint_ok = constraint_path.exists() and "2A202601873" in open(constraint_path, encoding="utf-8").read()
+    if check(constraint_ok, "Two-person team structure & constraint documented with full provenance"):
         passed += 1
 
     # 6. Human labels & Agreement

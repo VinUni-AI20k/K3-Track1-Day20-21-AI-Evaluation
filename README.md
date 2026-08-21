@@ -24,7 +24,7 @@ Trang web báo cáo trực tiếp được xuất bản công khai qua **GitHub 
 * **Lăng Thị Phương Huế** — Mã học viên: `2A202601915`
   * **Vai trò**: Collaborator, Independent Human Annotator.
 
-> **Xác nhận quy mô nhóm**: Nhóm thực hiện gồm đúng 02 thành viên chính thức nêu trên (đã có xác nhận đặc cách quy mô 2 người cho nhóm).
+> **Ràng buộc quy mô nhóm (Two-Person Team Constraint)**: Nhóm thực hiện gồm đúng 02 thành viên chính thức nêu trên. Toàn bộ quy trình đánh giá con người được thực hiện độc lập bởi 2 annotator, đo lường độ đồng thuận cặp (pairwise IAA) trước khi chốt nhãn vàng đồng thuận (xem chi tiết tại [`deliverables/evidence/TWO-PERSON-TEAM-CONSTRAINT.md`](deliverables/evidence/TWO-PERSON-TEAM-CONSTRAINT.md)).
 > **Tên repository chính thức**: `Track1_Day21_2A202601873_NguyenQuangHuy`
 > **Remote GitHub**: `https://github.com/Bietdoibongdem888/Track1_Day21_2A202601873_NguyenQuangHuy.git`
 > **Upstream gốc**: `https://github.com/VinUni-AI20k/K3-Track1-Day20-21-AI-Evaluation.git` (branch `master`)
