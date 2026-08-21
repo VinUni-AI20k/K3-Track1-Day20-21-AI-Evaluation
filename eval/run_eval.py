@@ -85,6 +85,8 @@ def main():
             rec.update(error=str(e))
             print("LỖI: %s" % e)
         results.append(rec)
+        # Sleep 1 second between questions
+        time.sleep(1.0)
 
     with open("results.jsonl", "w", encoding="utf-8") as f:
         for rec in results:

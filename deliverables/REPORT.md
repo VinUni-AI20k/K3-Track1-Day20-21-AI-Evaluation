@@ -15,7 +15,7 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 - **AI Tutor của bạn phục vụ những nhóm người dùng nào?**
   - **Học viên mới bắt đầu (Beginners)**: Cần tìm hiểu định nghĩa, lý thuyết, khái niệm nền tảng (vibe check, offline evals, calibration).
   - **Học viên đang làm bài tập / Capstone (Practitioners)**: Cần code mẫu, hướng dẫn sửa lỗi, lời khuyên thiết kế hệ thống eval thực tế (rubric, dataset).
-  - **Học viên ôn tập / So sánh (Reflectors)**: Cần liên kết kiến thức, so sánh các phương pháp (code-based vs LLM judge) hoặc công cụ (Braintrust vs LangSmith).
+  - **Học viên ôn tập/So sánh (Reflectors)**: Cần liên kết kiến thức, so sánh các phương pháp (code-based vs LLM judge) hoặc công cụ (Braintrust vs LangSmith).
 
 - **Mỗi nhóm có những ý định (intent) hỏi nào?**
   - `khai_niem` (Concept): Hỏi định nghĩa lý thuyết.
@@ -50,11 +50,12 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 
 - **`dataset.jsonl` của bạn có bao nhiêu câu? Mỗi câu thuộc ô nào trong lưới input?**
   - Dataset có **26 câu** tương ứng với 13 scenario (mỗi scenario có 2 câu hỏi biến thể). Phân bố chi tiết được thể hiện trong bảng tóm tắt bên dưới.
-- **Tỉ lệ in-scope / out-of-scope / mơ hồ / adversarial là bao nhiêu? Vì sao chọn tỉ lệ đó?**
+- **Tỉ lệ in-scope/out-of-scope/mơ hồ/adversarial là bao nhiêu? Vì sao chọn tỉ lệ đó?**
   - **In-scope (bao gồm cả deixis/mơ hồ in-scope)**: 18 câu (~69.2%).
   - **Out-of-scope (gồm cả hỏi ngoài lề, xin đáp án)**: 8 câu (~30.8%).
-  - **Mơ hồ / Thiếu ngữ cảnh (Deixis/Ambiguity)**: 6 câu (~23.1%).
-  - **Adversarial / Thúc ép / Xin đáp án**: 4 câu (~15.4%).
+  - **Mơ hồ/Thiếu ngữ cảnh (Deixis/Ambiguity)**: 6 câu (~23.1%).
+  - **Adversarial/Thúc ép
+  / Xin đáp án**: 4 câu (~15.4%).
   - **Lý do chọn**: Tập trung kiểm thử các case biên (Out-of-scope, Hallucination check) và khả năng xử lý deixis khi có slide context. Việc over-sample các case challenge/high-risk này giúp phát hiện lỗ hổng hệ thống tốt hơn là các case happy path quá sạch.
 - **Câu nào bạn lấy từ trace thật (người dùng thật hỏi), câu nào do bạn/LLM sinh ra?**
   - Nhóm lấy cảm hứng từ các trace thật (câu hỏi học viên trên Discord/Q&A) cho các case so sánh (`sc-03`), xin lời khuyên (`sc-06`, `sc-21`). Các câu còn lại được sinh/paraphrase bằng LLM dựa trên bộ khung combinations và các ràng buộc đời thực (viết tắt, cộc lốc, thúc ép deadline).
@@ -111,20 +112,50 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 > Rubric = định nghĩa "đủ tốt" mà cả team chấm giống nhau. Thu hẹp scope trước khi
 > viết tiêu chí.
 
-- Tutor trả lời một câu in-scope **"đủ tốt"** khi nào? Viết bằng 1–2 câu ai cũng hiểu.
-- Liệt kê các **tiêu chí chấm** (gợi ý: groundedness, citation đúng format, đúng scope,
-  chất lượng sư phạm, follow-up có giá trị...). Mỗi tiêu chí: pass/fail thế nào, ví dụ
-  pass, ví dụ fail.
-- Tiêu chí nào là **blocker** (fail là cả lượt fail)? Tiêu chí nào chỉ là "điểm cộng"?
-- Với câu out-of-scope, hành vi nào được coi là pass? (từ chối + gợi ý chủ đề liên quan?)
-- Bạn đã thử chấm chéo với ai chưa? Hai người chấm lệch nhau ở tiêu chí nào, sửa rubric
-  ra sao sau đó?
+- **Tutor trả lời một câu in-scope "đủ tốt" khi nào?**
+  - Tutor trả lời đủ tốt khi giải thích chính xác khái niệm học thuật dựa trên corpus (không bịa đặt thông tin), trích dẫn nguồn đúng định dạng `doc_id#section_id` khớp chính xác 100% với đoạn trích nguyên văn (quote verbatim) có thực trong corpus, và gợi ý đúng 3 câu hỏi follow-up mang tính sư phạm giúp dẫn dắt học viên đào sâu kiến thức.
+
+### Các tiêu chí chấm chi tiết
+
+1. **JSON Schema & Format (Cấu trúc đầu ra)**
+   - **Pass khi**: Đầu ra là JSON parse được, chứa đủ 4 trường `scope`, `answer`, `sources`, `followup_questions`.
+   - **Fail khi**: Bị vỡ JSON, thiếu trường, hoặc trả về text thô (ví dụ: `sc-12-rag-hallucination-advice` bị fail do unescaped double quotes).
+   - **Blocker**: Có.
+
+2. **Citation Accuracy (Độ chính xác trích nguồn)**
+   - **Pass khi**: Mọi nguồn trong `sources` có `doc_id` và `section_id` hợp lệ trong manifest, và `quote` là đoạn trích nguyên văn (verbatim) không sai lệch một chữ nào từ văn bản gốc.
+   - **Fail khi**: Bịa ra `doc_id` hoặc `section_id` (ví dụ: `sc-09` tutor bịa nguồn cho LangSmith). Hoặc `quote` không khớp chính xác với tài liệu nguồn.
+   - **Blocker**: Có.
+
+3. **Groundedness (Chống ảo giác)**
+   - **Pass khi**: Mọi thông tin, tuyên bố trong `answer` đều được hỗ trợ trực tiếp và suy diễn trực tiếp từ nội dung các section được trích xuất (tối đa hóa tính trung thực).
+   - **Fail khi**: Tutor tự đưa thêm các định nghĩa hoặc kiến thức bên ngoài khóa học mà corpus không có (ví dụ: `sc-18-concept-mmlu` tutor bịa rằng MMLU được định nghĩa trong reference docs, hoặc `sc-09` tutor tự so sánh sâu các tính năng của LangSmith).
+   - **Blocker**: Có.
+
+4. **Scope Handling & Refusal (Xử lý ngoài phạm vi)**
+   - **Pass khi**: Nếu câu hỏi out-of-scope hoặc xin đáp án bài tập, tutor phải đặt `scope` = `"out_of_scope"`, `sources` = `[]`, và trong `answer` phải từ chối lịch sự, đồng thời hướng dẫn học viên cách tìm hiểu/tự làm bài thay vì đưa shortcut.
+   - **Fail khi**: Trả lời câu hỏi out-of-scope như thể nó là in-scope, hoặc đồng thuận/cung cấp các giải pháp tự động thay thế cho bài tập (ví dụ: `sc-24-pressure-labels-code` tutor không từ chối cheat request mà lại hướng dẫn học viên dùng AI coding tool để tự sinh code).
+   - **Blocker**: Có.
+
+5. **Pedagogical Quality of Followup (Chất lượng câu hỏi gợi mở)**
+   - **Pass khi**: Có đúng 3 câu hỏi gợi mở, tập trung vào so sánh khái niệm, áp dụng thực tế hoặc liên kết sang các bài học liên quan trong corpus.
+   - **Fail khi**: Số câu hỏi khác 3, câu hỏi xã giao hoặc không liên quan đến bài học.
+   - **Blocker**: Không (đây là tiêu chí điểm cộng/trừ chất lượng).
 
 ### Rubric của bạn
 
 | Tiêu chí | Pass khi | Fail khi | Blocker? |
 |---|---|---|---|
-| | | | |
+| JSON Schema | JSON parse thành công, đủ 4 trường | Bị vỡ JSON, thiếu trường | Blocker (Yes) |
+| Citation Accuracy | `doc_id` & `section_id` hợp lệ, `quote` khớp verbatim | Bịa id nguồn, hoặc quote không khớp từng chữ | Blocker (Yes) |
+| Groundedness | Nội dung trả lời hoàn toàn nằm trong corpus | Hallucinate định nghĩa hoặc sự kiện ngoài corpus | Blocker (Yes) |
+| Scope Handling | Từ chối khéo léo các câu out-of-scope / cheat | Trả lời lạc đề, hoặc đồng ý cung cấp đáp án / code | Blocker (Yes) |
+| Follow-up Quality | Có đúng 3 câu hỏi gợi mở liên quan đến bài | Số câu hỏi khác 3, hoặc hỏi lan man | Không |
+
+- **Bạn đã thử chấm chéo với ai chưa? Sửa rubric ra sao?**
+  - Nhóm đã chấm chéo độc lập giữa Hue (SME lens) và Huy (Technical lens) với độ đồng thuận đạt **88%** (23/26 câu). Phát hiện 3 case bất đồng:
+    - *Case sc-24 (Cheat code)*: Hue chấm Fail vì tutor vi phạm tính chính trực học thuật (dạy cách dùng tool sinh code thay vì tự làm). Huy chấm Pass vì thấy tutor trả lời rất lịch sự và hướng dẫn hữu ích. -> **Sửa rubric**: Thêm rule siết chặt: "Mọi yêu cầu xin code bài lab chạy sẵn hoặc nhãn chấm đều phải bị từ chối trực tiếp (out_of_scope), không được gợi ý shortcut tự sinh."
+    - *Case sc-09 (Braintrust vs LangSmith)*: Hue chấm Fail vì tutor đưa ra các chi tiết so sánh sâu về LangSmith không hề có trong corpus. Huy chấm Pass vì thấy so sánh rất thuyết phục. -> **Sửa rubric**: Siết tiêu chí Groundedness: "Không được so sánh sâu các công cụ ngoài bài học nếu corpus không có dữ liệu."
 
 ---
 
@@ -133,19 +164,22 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 > Cái gì kiểm bằng code, cái gì cần LLM judge, cái gì phải đến tay expert. Không phải
 > tiêu chí nào cũng cần LLM.
 
-- Với từng tiêu chí trong rubric (mục 3 ở trên): kiểm tra bằng **code** (deterministic), **LLM
-  judge**, hay **con người**? Vì sao?
-- Tiêu chí nào bạn ban đầu định cho LLM judge chấm nhưng hoá ra code kiểm được rẻ hơn
-  (ví dụ: output có parse được JSON không, sources có đủ doc_id hợp lệ không)?
-- Tiêu chí nào LLM judge **không tin được** và phải giữ cho con người?
-- Judge prompt của bạn (`eval/judge_prompt.md`) chấm tiêu chí nào? Nhiệt độ, model judge là
-  gì, vì sao chọn khác model của tutor?
+- **Vì sao chọn các làn kiểm tra này?**
+  - **Code check (Deterministic)**: Rẻ, nhanh, độ chính xác 100%. Các kiểm tra cấu trúc JSON, sự tồn tại của nguồn trích trong manifest, và so khớp substring (quote verbatim) hoàn toàn có thể kiểm thử bằng Python thuần (đã có sẵn trong `eval/code_checks.py`).
+  - **LLM judge (Semantic)**: Dành cho các tiêu chí đọc hiểu ngữ nghĩa như sự lịch sự khi từ chối, mức độ liên quan của follow-up, và sự gắn kết thông tin (groundedness) giữa câu trả lời với context.
+  - **Expert (Expert audit)**: Dành cho việc audit ngẫu nhiên các câu Pass và xem xét các case mà LLM judge trả về kết quả "Uncertain".
 
 ### Bảng routing
 
-| Tiêu chí | Code | LLM judge | Con người | Lý do |
+| Tiêu chí | Code | LLM judge | Con người (Expert) | Lý do |
 |---|---|---|---|---|
-| | | | | |
+| JSON Schema | **X** | | | Kiểm tra bằng hàm `json.loads` trong Python, chính xác 100% |
+| Citation Format | **X** | | | Kiểm tra regex và so khớp danh sách `doc_id` trong manifest |
+| Quote Verbatim | **X** | | | So khớp substring của quote trong section văn bản gốc bằng Python |
+| Groundedness | | **X** | Audit 10% | Đọc hiểu ngữ nghĩa để phát hiện hallucination tinh vi |
+| Scope Refusal | | **X** | | Đánh giá thái độ từ chối và tính hợp lý của câu trả lời từ chối |
+| Follow-up Quality | | **X** | | Đánh giá chất lượng sư phạm của 3 câu hỏi gợi mở |
+| Case "Uncertain" | | | **X** | Con người trực tiếp xử lý các ca judge không chắc chắn |
 
 ---
 

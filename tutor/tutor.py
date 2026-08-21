@@ -207,6 +207,7 @@ def chat(messages, model=None, temperature=0, max_tokens=800, tools=None):
     t0 = time.time()
     last_err = None
     for attempt in range(3):  # gateway/provider thỉnh thoảng trả body JSON bị cắt ngang (200 nhưng không parse được) — retry
+        time.sleep(5.0)  # Sleep to avoid Gemini free tier RPM limits (15 requests/min)
         resp = requests.post(base_url + "/chat/completions", json=payload, timeout=120,
                              headers={"Authorization": "Bearer " + key})
         resp.raise_for_status()
