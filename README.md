@@ -1,3 +1,19 @@
+# Bài nộp AI Evaluation Capstone
+
+| Trường | Thông tin |
+|---|---|
+| Mã học viên | **TBD** |
+| Họ và tên | **TBD** |
+| Nhóm | **TBD** |
+| Đóng góp cá nhân | Thiết kế dataset/rubric, chạy eval, chấm độc lập, calibration hoặc report — **chỉnh lại theo đóng góp thật** |
+| Verdict | **HOLD — quote verbatim chỉ đạt 11/24; còn chờ human/judge calibration** |
+
+Report chính: [`deliverables/REPORT.md`](deliverables/REPORT.md). Data thô:
+[`deliverables/evidence/`](deliverables/evidence/). Nhật ký dùng AI:
+[`ai-support-log.md`](ai-support-log.md).
+
+---
+
 # K3 Track 1 · Day 20–21 — AI Evaluation (eval-kit)
 
 Repo làm bài capstone **AI Evaluation** của case **VLearn AI Tutor** — trợ giảng trả lời

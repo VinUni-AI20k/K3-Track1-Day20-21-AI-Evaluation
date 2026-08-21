@@ -6,8 +6,10 @@
 
 | # | Bước | AI dùng để làm gì | Bạn kiểm chứng kết quả thế nào |
 |---|------|-------------------|-------------------------------|
-| 1 | | | |
-| 2 | | | |
+| 1 | Grid/dataset | Gợi ý 24 scenario và metadata | Đối chiếu corpus; giữ pending tới team review |
+| 2 | Rubric/routing | Formalize blocker và tuyến chấm | Đối chiếu output contract và evaluator |
+| 3 | Code checks | Viết check scope enum/follow-up | Chạy test offline và output thật |
+| 4 | Judge prompt | Làm rõ deixis, adversarial, false-pass | So confusion matrix trên cùng dev set |
 
-- Phần nào AI gợi ý mà bạn **bác bỏ**? Vì sao?
-- Phần nào bạn **hoàn toàn tự làm**?
+- Bác bỏ việc điền pass rate hoặc verdict giả khi chưa có API output và nhãn người.
+- Con người review dataset, chấm độc lập, xử lý bất đồng, xác minh trace và ký verdict.

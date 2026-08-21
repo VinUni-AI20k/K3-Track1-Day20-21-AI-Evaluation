@@ -8,3 +8,7 @@ verdicts.jsonl
 labels.csv
 labels-*.csv
 report.html
+
+# Nhãn trong evidence là artifact bài nộp, phải được track.
+!deliverables/evidence/labels.csv
+!deliverables/evidence/labels-rater-*.csv

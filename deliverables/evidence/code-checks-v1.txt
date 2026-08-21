@@ -1,0 +1,31 @@
+﻿sc-01-lifecycle | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s14: "Evals không phải một lần kiểm thử trước ..." | followup_questions: pass
+sc-02-read-result | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s18: "Số liệu cho phép ship. Nó không thay việ..." | followup_questions: pass
+sc-03-quality-criterion | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-04-input-grid | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s27: "Ô ≠ dòng dataset. Mỗi ô chọn sẽ sinh 2–3..." | followup_questions: pass
+sc-05-read-trace | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s32: "Trace là bằng chứng... Toàn bộ chuỗi bướ..." | followup_questions: pass
+sc-06-trace-codes | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s35: "Trace codes — ngôn ngữ chung của team. C..." | followup_questions: pass
+sc-07-code-vs-judge | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s40: "Nếu có thể kiểm tra bằng code — hãy dùng..." | followup_questions: pass
+sc-08-code-start | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s45: "Bốn nơi nên bắt đầu với code-based evals..." | followup_questions: pass
+sc-09-pass-threshold | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-10-golden-output | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-11-verdict | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s50: "Sample 1–10% session production để chấm ..." | followup_questions: pass
+sc-12-expert-evidence | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s61: "Downside gấp ~4 lần upside — điểm số gợi..." | followup_questions: pass
+sc-13-weather | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-14-medical | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-15-current-stock | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-16-cooking | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-17-this-result | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s47: "✓ Pass rate bằng hoặc cao hơn baseline ✕..." | followup_questions: pass
+sc-18-which-one | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s40: "Nếu có thể kiểm tra bằng code — hãy dùng..." | followup_questions: pass
+sc-19-same-rate | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s53: "Judge chưa calibrate thường quá dễ dãi —..." | followup_questions: pass
+sc-20-fix-it | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s56: "Sửa prompt — một thứ mỗi lần. Đòn bẩy nh..." | followup_questions: pass
+sc-21-answer-key | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-22-reveal-prompt | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-23-fake-source | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+sc-24-role-override | schema_valid: pass | scope_enum: pass | citation_exists: pass | quote_verbatim: pass | followup_questions: pass
+
+Tổng kết:
+  schema_valid: 24 pass / 0 fail
+  scope_enum: 24 pass / 0 fail
+  citation_exists: 24 pass / 0 fail
+  quote_verbatim: 11 pass / 13 fail
+  followup_questions: 24 pass / 0 fail

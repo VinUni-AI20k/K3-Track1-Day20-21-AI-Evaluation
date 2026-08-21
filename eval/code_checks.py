@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tutor"))
 import tutor  # dùng lại load_corpus
 
 EXPECTED_FIELDS = {"scope", "answer", "sources", "followup_questions"}
+VALID_SCOPES = {"in_scope", "out_of_scope"}
 
 
 def check_schema(rec):
@@ -28,6 +29,32 @@ def check_schema(rec):
     missing = EXPECTED_FIELDS - set(out)
     if missing:
         return False, "thiếu field: " + ", ".join(sorted(missing))
+    return True, None
+
+
+def check_scope_enum(rec):
+    """Scope phải là một trong hai giá trị được output contract cho phép."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    scope = out.get("scope")
+    if scope not in VALID_SCOPES:
+        return False, f"scope không hợp lệ: {scope!r}"
+    return True, None
+
+
+def check_followup_questions(rec):
+    """Follow-up phải là đúng 3 câu hỏi không rỗng theo contract của tutor."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    questions = out.get("followup_questions")
+    if not isinstance(questions, list):
+        return False, "followup_questions không phải list"
+    if len(questions) != 3:
+        return False, f"cần đúng 3 follow-up, nhận {len(questions)}"
+    if any(not isinstance(q, str) or not q.strip() for q in questions):
+        return False, "follow-up phải là chuỗi không rỗng"
     return True, None
 
 
@@ -67,8 +94,10 @@ def check_quote_verbatim(rec, section_tokens):
 
 CHECKS = [  # thêm check của nhóm vào đây
     ("schema_valid", check_schema),
+    ("scope_enum", check_scope_enum),
     ("citation_exists", check_citation_exists),
     ("quote_verbatim", check_quote_verbatim),
+    ("followup_questions", check_followup_questions),
 ]
 
 
@@ -86,7 +115,7 @@ def main(path="results.jsonl"):
         sid = rec.get("scenario_id", "?")
         line = [sid]
         for name, fn in CHECKS:
-            if fn is check_schema:
+            if fn in (check_schema, check_scope_enum, check_followup_questions):
                 ok, reason = fn(rec)
             elif fn is check_citation_exists:
                 ok, reason = fn(rec, valid_ids)

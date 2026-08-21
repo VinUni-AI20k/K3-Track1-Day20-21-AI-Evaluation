@@ -3,6 +3,7 @@
 Cách dùng (chạy từ root repo):
   python3 eval/judge.py                # chấm tất cả các row
   python3 eval/judge.py sc-01 sc-03    # chỉ chấm các scenario_id được chọn
+  python3 eval/judge.py --set calibration  # chỉ chấm split trong metadata.set_type
 Judge dùng prompt trong eval/judge_prompt.md (placeholder {{input}} {{answer}} {{sources}}).
 Model judge mặc định khác model tutor (EVAL_JUDGE_MODEL, mặc định openai/gpt-4o-mini)
 để tránh tự chấm chéo cùng một model.
@@ -86,8 +87,20 @@ def main():
         sys.exit("Không thấy results.jsonl — chạy python3 eval/run_eval.py trước.")
     if not tutor.get_api_key(JUDGE_MODEL):
         sys.exit("Chưa có API key cho judge model %s — xem .env.example." % JUDGE_MODEL)
-    chosen = set(sys.argv[1:])
+    args = sys.argv[1:]
+    set_type = None
+    if "--set" in args:
+        pos = args.index("--set")
+        if pos + 1 >= len(args):
+            sys.exit("Thiếu giá trị sau --set (calibration hoặc holdout).")
+        set_type = args[pos + 1]
+        if set_type not in {"calibration", "holdout"}:
+            sys.exit("--set chỉ nhận calibration hoặc holdout.")
+        args = args[:pos] + args[pos + 2:]
+    chosen = set(args)
     rows = [r for r in results if not chosen or r["scenario_id"] in chosen]
+    if set_type:
+        rows = [r for r in rows if (r.get("metadata") or {}).get("set_type") == set_type]
     rows = [r for r in rows if "output" in r]  # bỏ row lỗi, không có gì để chấm
     template = open(PROMPT_PATH, encoding="utf-8").read()
     print("Chấm %d row bằng judge %s ..." % (len(rows), JUDGE_MODEL))

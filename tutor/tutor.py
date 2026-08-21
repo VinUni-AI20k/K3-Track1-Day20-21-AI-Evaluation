@@ -104,7 +104,9 @@ def get_api_key(model=MODEL):
     """Key theo family của model (openai/gpt-... -> OPENAI_API_KEY...)."""
     family = model.split("/")[0] if "/" in model else "openai"
     env_name = PROVIDERS.get(family, (f"{family.upper()}_API_KEY", None))[0]
-    return os.environ.get(env_name) or os.environ.get("OPENAI_API_KEY")
+    if BASE_URL:
+        return os.environ.get("EVAL_API_KEY") or os.environ.get(env_name)
+    return os.environ.get(env_name)
 
 # --- Xử lý text: bỏ dấu tiếng Việt + lowercase để so từ khoá ổn định
 def normalize(text):

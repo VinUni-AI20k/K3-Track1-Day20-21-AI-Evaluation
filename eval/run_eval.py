@@ -1,6 +1,7 @@
 """Chạy tutor trên toàn bộ dataset -> results.jsonl (kèm latency, tokens, chi phí).
 
 Cách dùng:  python3 eval/run_eval.py [dataset.jsonl]
+           python3 eval/run_eval.py [dataset.jsonl] --retry-errors
 Mặc định đọc dataset.jsonl ở root repo; nếu chưa có thì copy data/dataset.example.jsonl làm mẫu.
 Chạy TUẦN TỰ (không song song) để dễ đọc log và tránh vượt rate limit.
 
@@ -38,7 +39,12 @@ def read_jsonl(path):
         return [json.loads(line) for line in f if line.strip()]
 
 def main():
-    dataset_path = sys.argv[1] if len(sys.argv) > 1 else "dataset.jsonl"
+    args = sys.argv[1:]
+    retry_errors = "--retry-errors" in args
+    args = [arg for arg in args if arg != "--retry-errors"]
+    if len(args) > 1:
+        sys.exit("Cách dùng: python3 eval/run_eval.py [dataset.jsonl] [--retry-errors]")
+    dataset_path = args[0] if args else "dataset.jsonl"
     if not os.path.exists(dataset_path):
         sys.exit("Không thấy %s. Tạo bằng: cp data/dataset.example.jsonl dataset.jsonl"
                  % dataset_path)
@@ -50,14 +56,26 @@ def main():
                  "rồi chạy lại." % tutor.MODEL)
 
     rows = read_jsonl(dataset_path)
+    previous = {}
+    if retry_errors and os.path.exists("results.jsonl"):
+        previous = {r.get("scenario_id"): r for r in read_jsonl("results.jsonl")}
     print("Dataset: %d câu | model: %s" % (len(rows), tutor.MODEL))
-    results, total_cost, t_start = [], 0.0, time.time()
+    results, total_cost, traced_count, t_start = [], 0.0, 0, time.time()
 
     for i, row in enumerate(rows, 1):
         q = row["input"]
+        sid = row.get("scenario_id") or row.get("id") or "row-%d" % i
+        prior = previous.get(sid)
+        if retry_errors and prior and "output" in prior:
+            results.append(prior)
+            total_cost += prior.get("cost_usd") or 0
+            print("[%d/%d] %s ... giữ kết quả thành công cũ" % (i, len(rows), q[:60]))
+            continue
         print("[%d/%d] %s ... " % (i, len(rows), q[:60]), end="", flush=True)
-        rec = {"scenario_id": row.get("scenario_id") or row.get("id") or "row-%d" % i,
-               "input": q}
+        rec = {"scenario_id": sid,
+               "input": q,
+               "expected_scope": row.get("expected_scope"),
+               "metadata": row.get("metadata") or {}}
         slide = (row.get("metadata") or {}).get("slide")
         if slide:
             rec["slide"] = slide  # giữ lại để judge/report chấm theo đúng bối cảnh
@@ -78,6 +96,7 @@ def main():
                          "latency_s": meta["latency_s"],
                          **({"cost_usd": cost} if cost else {})},
             )
+            traced_count += 1
             print("ok (%.1fs, %s tok, $%s)" % (
                 meta["latency_s"], meta["usage"].get("total_tokens", "?"),
                 "%.6f" % cost if cost is not None else "?"))
@@ -93,8 +112,8 @@ def main():
           % (len(results), time.time() - t_start, total_cost))
     if _tracer.backend:
         _tracer.flush()
-        print("Đã log %d trace lên %s (project '%s')."
-              % (len(results), _tracer.backend,
+        print("Đã log %d trace mới lên %s (project '%s')."
+              % (traced_count, _tracer.backend,
                  os.environ.get("BRAINTRUST_PROJECT") or os.environ.get("LANGSMITH_PROJECT")
                  or "ai-evaluation"))
     print("Bước tiếp: python3 eval/judge.py (chấm tự động) hoặc python3 eval/report.py (xem report)")
