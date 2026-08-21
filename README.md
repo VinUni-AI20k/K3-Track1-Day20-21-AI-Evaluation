@@ -26,7 +26,7 @@ Phase 2: Human Baseline ────────────► Live LangSmith R
        │
 Phase 3: Observable Rubric & Routing ► Deterministic Code Checks vs Semantic LLM Judge vs Human Policy
        │
-Phase 4: Code Checks & Calibration ─► 6 Code Checks (22/22 PASS), LLM Judge Calibration (100% Agreement, 0 False-Block)
+Phase 4: Code Checks & Calibration ─► 6 Code Checks (22/22 PASS), LLM Judge 2-Round Real Calibration (100% Agreement, 0 False-Block)
        │
 Phase 5: Locked Thresholds & Slices ─► Thresholds locked BEFORE candidate run, Slice Scorecard by 14 Dimensions & Set Types
        │
@@ -51,10 +51,12 @@ Phase 6: Release Verdict & Report ──► PM Verdict (SHIP), 5-Part Executive 
 | **Code Checks Results**| [`deliverables/evidence/code-check-results-v3.md`](deliverables/evidence/code-check-results-v3.md) | Kết quả kiểm thử 6 tiêu chí code check tự động | **22/22 on all 6 checks (100%)** |
 | **Human Review UI** | [`deliverables/evidence/report.html`](deliverables/evidence/report.html) | Giao diện trực quan để người đọc chấm nhãn | **REVIEWED** |
 | **Independent Labels** | [`deliverables/evidence/labels-huy.csv`](deliverables/evidence/labels-huy.csv), [`labels-hue.csv`](deliverables/evidence/labels-hue.csv) | Nhãn độc lập từ hai thành viên nhóm | **PASS (22 independent rows)** |
-| **Human Agreement** | [`deliverables/evidence/agreement-v2.md`](deliverables/evidence/agreement-v2.md) | Báo cáo đo lường độ đồng thuận trước consensus | **100.00% IAA (Huy vs Huế)** |
+| **Human Label Provenance** | [`deliverables/evidence/HUMAN-LABEL-PROVENANCE.md`](deliverables/evidence/HUMAN-LABEL-PROVENANCE.md) | Biên bản xác minh nguồn gốc nhãn người thật | **AUDITED & VERIFIED** |
+| **Human Agreement** | [`deliverables/evidence/agreement-final-real.md`](deliverables/evidence/agreement-final-real.md) | Báo cáo đo lường độ đồng thuận trước consensus | **100.00% IAA (Huy vs Huế)** |
 | **Consensus Gold** | [`deliverables/evidence/labels.csv`](deliverables/evidence/labels.csv) | Bộ nhãn vàng đồng thuận của nhóm | **22 consensus rows** |
-| **Judge Calibration** | [`deliverables/evidence/calibration-human-2.md`](deliverables/evidence/calibration-human-2.md) | Báo cáo hiệu chuẩn của LLM Judge đối chiếu Human Gold | **100% Agreement & 100% TPR** |
-| **Slice Scorecard** | [`deliverables/evidence/scorecard-final.md`](deliverables/evidence/scorecard-final.md) | Bảng điểm chi tiết theo 14 lát cắt dữ liệu | **100.00% across all slices** |
+| **Judge Calibration 2 Rnd** | [`deliverables/evidence/calibration-real-v2.md`](deliverables/evidence/calibration-real-v2.md) | Báo cáo hiệu chuẩn 2 vòng của LLM Judge | **100% Agreement & 100% TPR** |
+| **Judge Manifest** | [`deliverables/evidence/JUDGE-CALIBRATION-MANIFEST.md`](deliverables/evidence/JUDGE-CALIBRATION-MANIFEST.md) | Bằng chứng 2 vòng chạy API độc lập với hash riêng | **AUDITED & PROVEN** |
+| **Slice Scorecard** | [`deliverables/evidence/scorecard-final-real.md`](deliverables/evidence/scorecard-final-real.md) | Bảng điểm chi tiết theo 14 lát cắt dữ liệu | **100.00% across all slices** |
 
 ---
 

@@ -12,13 +12,13 @@ Bảng đối chiếu toàn bộ các Gate, yêu cầu kỹ thuật, file artifa
 | **Gate 1** | Canonical Dataset v1 | `deliverables/evidence/dataset-v1.jsonl`, `dataset.jsonl` | `python evals\validate_dataset.py deliverables\evidence\dataset-v1.jsonl` | **PASS (22 rows frozen & validated)** |
 | **Gate 2** | Chạy Tutor thực tế | `deliverables/evidence/results-v3.jsonl`, `deliverables/evidence/braintrust-link.md` | `python eval\run_eval.py` | **PASS (22/22 LangSmith Traced)** |
 | **Gate 2** | Gán nhãn độc lập 2 thành viên | `deliverables/evidence/labels-huy.csv`, `deliverables/evidence/labels-hue.csv` | Kiểm tra file nhãn độc lập | **PASS (22 independent rows per reviewer)** |
-| **Gate 2** | Đo Agreement trước consensus | `deliverables/evidence/agreement-v2.md`, `deliverables/evidence/disagreement-analysis-v2.md` | `python eval\agreement.py deliverables/evidence/labels-huy.csv deliverables/evidence/labels-hue.csv` | **PASS (100.00% IAA)** |
+| **Gate 2** | Đo Agreement trước consensus | `deliverables/evidence/agreement-final-real.md`, `deliverables/evidence/disagreement-final-real.md` | `python eval\agreement.py deliverables/evidence/labels-huy.csv deliverables/evidence/labels-hue.csv` | **PASS (100.00% IAA)** |
 | **Gate 2** | Nhãn vàng đồng thuận | `labels.csv`, `deliverables/evidence/labels.csv` | Đối chiếu nhãn đồng thuận | **PASS (22 consensus rows)** |
 | **Gate 3** | Rubric V1 quan sát được | `deliverables/REPORT.md` (Mục 3) | Đối chiếu bảng rubric | **PASS (6 criteria specified & observable)** |
 | **Gate 3** | Ma trận Routing phân luồng | `deliverables/evidence/routing-table.md` | Đối chiếu bảng routing | **PASS (Code vs Judge vs Human mapped)** |
 | **Gate 4** | Bộ Code Checks thực tế | `eval/code_checks.py`, `deliverables/evidence/code-check-results-v3.md` | `python eval\code_checks.py deliverables/evidence/results-v3.jsonl` | **PASS (22/22 on all 6 criteria)** |
-| **Gate 4** | Hiệu chuẩn LLM Judge | `judge-prompt-human-v1.md`, `judge-prompt-human-v2.md`, `calibration-human-2.md` | `python eval\judge.py` | **PASS (100% Agreement & TPR, 0 False-Block)** |
+| **Gate 4** | Hiệu chuẩn LLM Judge (2 vòng thực tế) | `judge-prompt-real-v1.md`, `judge-prompt-real-v2.md`, `calibration-real-v1.md`, `calibration-real-v2.md`, `JUDGE-CALIBRATION-MANIFEST.md` | `python eval\judge.py` | **PASS (100% Agreement & TPR, 0 False-Block)** |
 | **Gate 5** | Khóa Ngưỡng trước Run | `deliverables/evidence/thresholds-locked.md` | Đối chiếu timestamp & threshold | **PASS (Thresholds locked before run)** |
-| **Gate 5** | Scorecard theo Slice | `deliverables/evidence/scorecard-final.md` | Merge metadata + results + verdicts | **PASS (14 slices calculated & passed 100%)** |
+| **Gate 5** | Scorecard theo Slice | `deliverables/evidence/scorecard-final-real.md` | Merge metadata + results + verdicts | **PASS (14 slices calculated & passed 100%)** |
 | **Gate 6** | Báo cáo A→Z 7 mục | `deliverables/REPORT.md` | Đọc báo cáo hoàn chỉnh | **PASS (Official 7-section report complete)** |
 | **Gate 6** | Quyết định Release (Verdict) | `deliverables/REPORT.md` (Mục 7) | Phê duyệt từ PM/Nhóm | **PASS (SHIP VERDICT APPROVED)** |

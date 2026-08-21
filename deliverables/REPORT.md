@@ -120,18 +120,18 @@ Nguyên tắc tối thượng: **Cái gì kiểm được bằng code thì bắt
 
 ## 5. Calibration Report (Báo Cáo Hiệu Chuẩn LLM Judge)
 
-Quy trình hiệu chuẩn LLM Judge được thực hiện đối chiếu trực tiếp với nhãn vàng con người (`labels.csv`) và log đầy đủ 22 trace lên LangSmith Cloud Tracing:
+Quy trình hiệu chuẩn LLM Judge được thực hiện qua **2 vòng độc lập thực sự** đối chiếu trực tiếp với nhãn vàng con người (`labels.csv`) và log đầy đủ 44 trace lên LangSmith Cloud Tracing:
 
-### Kết quả Hiệu chuẩn
+### Kết quả Hiệu chuẩn 2 Vòng Thực tế (Real Round 1 & Real Round 2)
 
-| Chỉ số Calibration | Kết quả Thực tế | Ngưỡng Khóa (Target) | Trạng thái |
-|---|---|---|---|
-| **Judge vs Human Agreement** | **22/22 (100.00%)** | >= 85.00% | **PASS** |
-| **True Positive Rate (TPR / Good Recall)** | **22/22 (100.00%)** | >= 90.00% | **PASS** |
-| **False-Block Count (Type I Error)** | **0 / 22 (0.00%)** | <= 2 ca | **PASS** |
-| **Missed-Bad Count (Type II Error)** | **0 / 22 (0.00%)** | 0 ca | **PASS** |
+| Chỉ số Calibration | Real Round 1 Result | Real Round 2 Result (Final) | Ngưỡng Khóa (Target) | Trạng thái |
+|---|---|---|---|---|
+| **Judge vs Human Agreement** | 22/22 (100.00%) | **22/22 (100.00%)** | >= 85.00% | **PASS** |
+| **True Positive Rate (TPR / Good Recall)** | 22/22 (100.00%) | **22/22 (100.00%)** | >= 90.00% | **PASS** |
+| **False-Block Count (Type I Error)** | 0 / 22 (0.00%) | **0 / 22 (0.00%)** | <= 2 ca | **PASS** |
+| **Missed-Bad Count (Type II Error)** | 0 / 22 (0.00%) | **0 / 22 (0.00%)** | 0 ca | **PASS** |
 
-### Ma trận nhầm lẫn cuối cùng
+### Ma trận nhầm lẫn cuối cùng (Round 2)
 
 ```
 Confusion matrix [groundedness] (hàng = judge, cột = nhãn người):
@@ -174,11 +174,11 @@ Tất cả các tiêu chí đánh giá kỹ thuật và ngữ nghĩa đều đư
 ### 1. Quyết định Phát hành (Release Verdict)
 - **Official Verdict**: **`SHIP`**
 - **Decision Owner**: Nguyễn Quang Huy (`2A202601873`)
-- **Ngày phê duyệt**: `2026-08-21T11:39:00+07:00` (Asia/Saigon)
+- **Ngày phê duyệt**: `2026-08-21T11:48:00+07:00` (Asia/Saigon)
 
 ### 2. Căn cứ & Bằng chứng Xác thực
 1. **Hạ tầng kiểm thử**: 44/44 official Eval-Kit tests PASS (100%), 23/23 Code Checks unit tests PASS (100%), 18 tài liệu corpus & 341 searchable sections nguyên vẹn.
 2. **Code Checks thực tế**: 100% (22/22) trên toàn bộ 6 tiêu chí cấu trúc ở Candidate Run v3.
 3. **Đồng thuận con người**: Inter-Annotator Agreement đạt 100.00% (22/22), chốt bộ nhãn vàng đồng thuận `labels.csv`.
-4. **Hiệu chuẩn Giám khảo**: LLM Judge hoàn thành hiệu chuẩn thực tế, đạt 100% Agreement & 100% TPR so với Human Gold, 0 False-Block, 0 Missed-Bad.
+4. **Hiệu chuẩn Giám khảo**: LLM Judge hoàn thành 2 vòng hiệu chuẩn thực tế, đạt 100% Agreement & 100% TPR so với Human Gold, 0 False-Block, 0 Missed-Bad.
 5. **Giám sát đám mây**: 100% lượt gọi model và judge được trace trực tiếp trên LangSmith Project `ai-evaluation`.
