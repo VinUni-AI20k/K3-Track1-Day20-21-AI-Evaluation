@@ -52,16 +52,63 @@ def _token_subsequence(needle, haystack):
 
 
 def check_quote_verbatim(rec, section_tokens):
-    """Quote phải nằm trong section đã cite — so theo chuỗi token (bỏ dấu, lowercase,
-    bỏ mọi dấu câu/khoảng trắng) nên khác biệt gạch ngang/ngoặc kép không tính là sai."""
+    """Quote phải truy được về section đã cite — so theo chuỗi token (bỏ dấu, lowercase,
+    bỏ mọi dấu câu/khoảng trắng) nên khác biệt gạch ngang/ngoặc kép không tính là sai.
+
+    Rule v2 (sửa sau khi đối chiếu với nhãn tay ở Phase 4): dấu lược "..." KHÔNG còn bị
+    tính là fail nếu MỌI mảnh hai bên dấu lược đều nằm trong đúng section đã cite.
+    Lý do: v1 gộp chung ba mức nghiêm trọng rất khác nhau — bịa nguyên câu trích (6 ca),
+    cite sai địa chỉ section (1 ca) và lược trích đúng thông lệ (5 ca). Chỉ hai loại đầu
+    mới là lỗi groundedness; loại thứ ba là cách trích dẫn hợp lệ.
+    Ai muốn siết nguyên văn tuyệt đối thì đặt QUOTE_STRICT=1."""
     out = rec.get("output") or {}
     if out.get("_parse_error"):
         return None, "bỏ qua (JSON vỡ)"
+    strict = os.environ.get("QUOTE_STRICT") == "1"
     for s in out.get("sources") or []:
         tokens = section_tokens.get((s.get("doc_id"), s.get("section_id")), [])
-        quote_tokens = tutor.tokens(s.get("quote") or "")
-        if quote_tokens and not _token_subsequence(quote_tokens, tokens):
-            return False, f'quote không khớp section {s.get("section_id")}: "{(s.get("quote") or "")[:40]}..."'
+        quote = s.get("quote") or ""
+        pieces = [quote] if strict else [p for p in quote.replace("…", "...").split("...") if p.strip()]
+        for piece in pieces:
+            pt = tutor.tokens(piece)
+            if pt and not _token_subsequence(pt, tokens):
+                return False, f'quote không truy được về section {s.get("section_id")}: "{piece.strip()[:40]}..."'
+    return True, None
+
+
+def check_scope_contract(rec):
+    """C5 (phần cứng): out_of_scope thì sources PHẢI rỗng; in_scope thì PHẢI có ≥1 nguồn.
+
+    Đây là ràng buộc contract viết được thành rule — phần "câu này corpus có phủ không"
+    mới cần judge. Tách ra để judge khỏi phải chấm thứ code kiểm được."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    scope = out.get("scope")
+    n = len(out.get("sources") or [])
+    if scope == "out_of_scope" and n > 0:
+        return False, f"out_of_scope nhưng vẫn trích {n} nguồn"
+    if scope == "in_scope" and n == 0:
+        return False, "in_scope nhưng sources rỗng"
+    if scope not in ("in_scope", "out_of_scope"):
+        return False, f"scope không hợp lệ: {scope!r}"
+    return True, None
+
+
+def check_followup_count(rec):
+    """C7 (phần đếm được): đúng 3 câu follow-up, không rỗng, không trùng nhau.
+
+    Chất lượng dẫn dắt thì để judge; còn "đủ 3 câu và không lặp" là việc của code."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    fu = out.get("followup_questions") or []
+    if len(fu) != 3:
+        return False, f"có {len(fu)} câu follow-up, cần đúng 3"
+    if any(not str(q).strip() for q in fu):
+        return False, "có câu follow-up rỗng"
+    if len({str(q).strip().lower() for q in fu}) < 3:
+        return False, "có câu follow-up trùng nhau"
     return True, None
 
 
@@ -69,6 +116,8 @@ CHECKS = [  # thêm check của nhóm vào đây
     ("schema_valid", check_schema),
     ("citation_exists", check_citation_exists),
     ("quote_verbatim", check_quote_verbatim),
+    ("scope_contract", check_scope_contract),      # nhóm thêm — C5 phần cứng
+    ("followup_count", check_followup_count),      # nhóm thêm — C7 phần đếm
 ]
 
 
@@ -86,7 +135,7 @@ def main(path="results.jsonl"):
         sid = rec.get("scenario_id", "?")
         line = [sid]
         for name, fn in CHECKS:
-            if fn is check_schema:
+            if fn in (check_schema, check_scope_contract, check_followup_count):
                 ok, reason = fn(rec)
             elif fn is check_citation_exists:
                 ok, reason = fn(rec, valid_ids)

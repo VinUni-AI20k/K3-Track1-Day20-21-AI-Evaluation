@@ -276,13 +276,109 @@ Chi tiết 15 case: `evidence/agreement-v1.md`.
 Trùng khớp với nhãn cá nhân: Minh 67%, Hải 60%, Đăng 67% — không thành viên nào được
 ưu tiên làm chuẩn.
 
-### Phần B — Judge calibration (Phase 4, CHƯA CHẠY)
+### Phần B — Làn Code (Phase 4)
 
-### Confusion matrix (dán output judge.py)
+Chạy `python3 eval/code_checks.py` trên `evidence/results-v1.jsonl` — 5 rule, $0, 0 giây gọi API.
+
+| Check | Pass | Fail | Ghi chú |
+|---|---|---|---|
+| `schema_valid` | 30 | 0 | Contract JSON 4 field — tutor không vỡ lần nào |
+| `citation_exists` | 30 | 0 | Không bịa `doc_id#section_id` lần nào |
+| `quote_verbatim` (rule v2) | 23 | **7** | Xem phần sửa rule bên dưới |
+| `scope_contract` *(nhóm thêm)* | 30 | 0 | Ràng buộc cứng: `out_of_scope` ⇒ `sources` rỗng |
+| `followup_count` *(nhóm thêm)* | 30 | 0 | Đúng 3 câu, không rỗng, không trùng |
+
+**Sửa rule, không sửa nhãn.** Rule v1 của `quote_verbatim` fail 12/30 trong khi người
+chấm tay pass gần hết — theo lab, đó là dấu hiệu rule viết chưa đúng. Phân loại 12 ca:
+
+| Kiểu lệch | Số ca | Có phải lỗi groundedness? |
+|---|---|---|
+| Quote **không tồn tại ở đâu** trong corpus | 6 | ✅ Có — bịa trích dẫn |
+| Quote có thật nhưng **ở section khác** | 1 | ✅ Có — cite sai địa chỉ |
+| Ghép 2 đoạn rời bằng `"..."`, **mọi mảnh đều nằm trong đúng section** | 5 | ❌ Không — lược trích là thông lệ |
+
+Rule v2 tách dấu lược `...` và yêu cầu từng mảnh phải nằm trong section đã cite →
+fail **7/30** (đúng số ca thật). Giữ chế độ cũ qua `QUOTE_STRICT=1` để đối chiếu được.
+
+**Điểm quan trọng nhất của làn Code:** `scope_contract` pass 30/30 trong khi lỗi scope
+thật là **8/12**. Nghĩa là code kiểm được *ràng buộc hình thức* (`out_of_scope` thì
+`sources` phải rỗng) nhưng **không** kiểm được *câu hỏi này corpus có phủ không*. Đó
+chính là ranh giới giữa làn Code và làn Judge, đo được bằng số chứ không phải phỏng đoán.
+
+### Phần C — Judge calibration
+
+- **Model judge:** `openrouter/openai/gpt-4o-mini`, `temperature=0` — khác model tutor
+  (`openrouter/deepseek/deepseek-v4-flash`) để tránh model tự chấm bài của chính mình.
+- **Phạm vi judge:** chỉ C4 (grounded) + C5 (scope). Cố tình **không** chấm C6.
+- **Nhãn vàng dùng để so:** `evidence/labels-gold-c4c5.csv` — tách từ nhãn vàng tổng,
+  6 row chỉ fail ở C6 được chuyển về `pass` vì nằm ngoài phạm vi judge. So judge một
+  tiêu chí với nhãn tổng là so nhầm chuẩn.
+
+#### Vòng 1 — `judge-prompt-v1.md` → `verdicts-v1.jsonl`
 
 ```
-(dán ở đây)
+Confusion matrix (hàng = judge, cột = nhãn người):
+           |      pass      fail uncertain
+      pass |         8         1         0
+      fail |        12         8         1
+ uncertain |         0         0         0
+Agreement: 16/30 = 53%
 ```
+
+**Hai con số đọc riêng:**
+
+| Câu hỏi | Kết quả |
+|---|---|
+| Trong 20 output thật sự **TỐT**, judge nhận đúng bao nhiêu? | **8/20 = 40%** → chặn nhầm 12 |
+| Trong 9 output thật sự **XẤU**, judge bắt được bao nhiêu? | **8/9 = 89%** → bỏ sót 1 |
+
+**Judge của nhóm đang chặt quá, không phải dễ quá** — ngược với kỳ vọng thông thường
+của lab (LLM mặc định dễ tính). Nguyên nhân: prompt v1 nhồi 4 ví dụ near-miss toàn kiểu
+"suýt đúng nhưng sai", làm judge nghiêng hẳn về phía bắt lỗi.
+
+**Hai pattern lệch, tách bạch rõ:**
+
+| Pattern | Số ca | Ca đại diện | Chẩn đoán |
+|---|---|---|---|
+| **A. Phạt mọi diễn giải không nằm nguyên văn trong `quote`** | 7 | `sc-13` — answer viết "ví dụ, rubric có thể xác định độ chính xác trên 92%"; số 92% **có** trong section `ai-evals-m03#evaluation-rubric` đã cite, chỉ không nằm trong đoạn quote ngắn | **Lỗi thiết kế prompt.** `judge.py` chỉ đưa `quote` cho judge, không đưa toàn văn section — nhưng prompt v1 lại bắt đối chiếu với quote |
+| **B. Đánh trượt các ca TỪ CHỐI ĐÚNG** | 5 | `sc-17` — tutor trả `out_of_scope`, `sources=[]`, từ chối lịch sự; judge fail vì "không cung cấp thông tin nào từ corpus" | **Lỗ hổng logic prompt.** v1 không có một dòng nào nói từ chối đúng cách là hành vi ĐÚNG |
+
+#### Vòng 2 — `judge-prompt-v2.md` (đã viết, **CHƯA CHẠY ĐƯỢC**)
+
+Đổi **đúng một thứ** so với v1: thêm quy tắc "PASS bắt buộc — từ chối đúng cách", nhắm
+riêng pattern B. Dự kiến 5 ca chặn nhầm sẽ lật, kéo tỉ lệ nhận đúng output tốt từ
+40% lên khoảng 65%.
+
+**Chưa có số liệu:** tài khoản OpenRouter hết credit giữa chừng — cả 30 request trả
+`HTTP 402 Payment Required`, verdicts vòng 2 không hợp lệ nên **không** đưa vào
+`evidence/`. Cần nạp credit rồi chạy lại `python3 eval/judge.py`.
+
+Vòng 3 dự kiến sẽ nhắm pattern A: đưa toàn văn section vào prompt judge, hoặc nới tiêu
+chí 3 để chấp nhận diễn giải và ví dụ minh hoạ.
+
+#### Trần đồng thuận
+
+Human–human agreement là **50%**. Judge vòng 1 đạt **53%** — tức judge đã ngang trần
+đồng thuận của chính con người ngay từ vòng đầu. Đây **không** phải tin tốt: nó nói
+rằng nhãn vàng cho C4+C5 còn chưa đủ nhất quán để làm chuẩn chặt. Muốn judge tốt hơn
+thì phải siết rubric trước, không phải siết prompt.
+
+### Phần D — Verdict từng evaluator
+
+| Tiêu chí | Giao cho | Số liệu chống lưng | Điều kiện đi kèm |
+|---|---|---|---|
+| C1 `schema_valid` | **Code** — gate cứng | 30/30, $0 | Chạy mọi lần release |
+| C2 `citation_exists` | **Code** — gate cứng | 30/30, $0 | Chạy mọi lần release |
+| C3 `quote_verbatim` | **Code** — gate cứng | Bắt 7/30 ca thật, $0 | Dùng rule v2; review lại rule nếu tutor đổi cách trích |
+| C5 (phần cứng) `scope_contract` | **Code** — gate cứng | 30/30 | Chỉ kiểm hình thức, không thay được judge |
+| C4 `grounded_claims` | **LLM assist** — chưa đủ tin làm gate | Bắt 89% output xấu nhưng chặn nhầm 60% output tốt | Máy gom nghi vấn, người duyệt. Xét lại sau vòng 2–3 |
+| C5 (phần ngữ nghĩa) | **LLM assist** | Judge nhầm cả 5 ca từ chối đúng ở v1 | Chờ v2 |
+| C6 `clarification` | **Expert** | Người còn disagree **86%** ở nhóm `unclear` | Không giao máy cho tới khi rubric siết lại |
+| C7 chất lượng follow-up | **Chưa calibrate được** | Không có nhãn vàng cho tiêu chí này | Không dùng làm gate |
+
+**Judge nào không calibrate nổi, vì sao:** C7 (chất lượng follow-up) — nhóm chấm nhãn
+tổng chứ chưa từng chấm riêng tiêu chí này, nên không có chuẩn vàng để so. Chạy judge
+cho nó lúc này chỉ ra một con số không kiểm chứng được.
 
 ---
 

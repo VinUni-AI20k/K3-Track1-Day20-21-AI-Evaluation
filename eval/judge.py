@@ -102,7 +102,10 @@ def main():
                 inputs={"scenario_id": rec["scenario_id"], "judge_model": JUDGE_MODEL},
                 outputs={"verdict": v["verdict"], "rationale": v.get("rationale", "")},
                 metrics={**{k: x for k, x in v.get("usage", {}).items()
-                            if isinstance(x, (int, float))},
+                            if isinstance(x, (int, float)) and not isinstance(x, bool)},
+                         # bool là subclass của int -> lọt qua filter và làm
+                         # Braintrust trả 400 (metrics phải là number), mất cả batch trace.
+                         # OpenRouter trả usage.is_byok khi thì 0, khi thì false.
                          "latency_s": v.get("latency_s", 0)},
             )
             print(v["verdict"])

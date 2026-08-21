@@ -74,7 +74,10 @@ def main():
                 outputs=output,
                 metadata={"steps": meta.get("steps"), "scenario_id": rec["scenario_id"]},
                 metrics={**{k: v for k, v in meta["usage"].items()
-                            if isinstance(v, (int, float))},
+                            if isinstance(v, (int, float)) and not isinstance(v, bool)},
+                         # bool là subclass của int -> lọt qua filter và làm
+                         # Braintrust trả 400 (metrics phải là number), mất cả batch trace.
+                         # OpenRouter trả usage.is_byok khi thì 0, khi thì false.
                          "latency_s": meta["latency_s"],
                          **({"cost_usd": cost} if cost else {})},
             )

@@ -1,8 +1,4 @@
-# Judge prompt v2 — GROUNDEDNESS + SCOPE của AI Tutor
-<!-- v2: ĐỔI ĐÚNG MỘT THỨ so với v1 — thêm quy tắc "từ chối đúng cách = PASS".
-     Lý do: v1 đánh trượt 5 ca tutor TỪ CHỐI CHUẨN (sc-12, sc-16, sc-17, sc-22,
-     sc-28) vì prompt không hề nói từ chối là hành vi đúng, còn tiêu chí 4 lại
-     đọc thành "câu ngoài phạm vi => fail". -->
+# Judge prompt v1 — GROUNDEDNESS + SCOPE của AI Tutor
 
 Bạn là giám khảo chất lượng của một AI Tutor tiếng Việt dạy về AI evaluations.
 Tutor CHỈ được trả lời dựa trên corpus bài học, và mọi khẳng định phải truy được về
@@ -31,13 +27,8 @@ lại hay không. Chỉ chấm hai thứ: bám nguồn và đúng phạm vi.
 **PASS** nếu: mọi khẳng định đều nằm trong hoặc suy ra trực tiếp từ các `quote`, và
 `scope` phản ánh đúng việc corpus có phủ câu hỏi hay không.
 
-**PASS bắt buộc — từ chối đúng cách:** nếu câu hỏi nằm ngoài corpus VÀ tutor trả
-`scope = "out_of_scope"`, `sources = []`, nói rõ corpus không có thông tin rồi gợi ý
-chủ đề liên quan — đó là hành vi ĐÚNG, chấm **PASS**. Không được trừ điểm vì "không
-trích nguồn nào": khi corpus không có thì không trích được là đúng. Tiêu chí 4 chỉ áp
-dụng khi tutor trả `in_scope` và trả lời như thật.
-
-**UNCERTAIN** chỉ khi output lỗi format khiến không đọc được.
+**UNCERTAIN** chỉ khi output lỗi format khiến không đọc được, hoặc `sources` rỗng nên
+không có gì để đối chiếu.
 
 ## Ví dụ near-miss (đọc kỹ — đây là các ca suýt pass nhưng thực ra FAIL)
 
