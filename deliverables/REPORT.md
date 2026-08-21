@@ -641,45 +641,77 @@ chất lượng trích dẫn và nhận diện phạm vi.
 
 ## 7. Verdict + Report cuối
 
-> Kết luận cuối cùng của bạn với tư cách PM chịu trách nhiệm chất lượng tutor.
-> Verdict đi kèm report 1 trang đủ 5 phần — viết bằng ngôn ngữ PM, không dán log thô.
+### Verdict của nhóm em: HOLD
 
-### Report
+Nhóm em quyết định chưa cho AI Tutor ra mắt rộng hơn. Tụi em chọn HOLD vì tutor còn trượt hai ngưỡng nằm trong nhóm không được phép đánh đổi, và cả hai ngưỡng đó đều liên quan tới việc tutor trả lời sai sự thật cho người học.
 
-#### 1. Dataset đã đánh giá
+### Report một trang
 
-(tập nào, bao nhiêu traces, coverage chính là gì, blind spot nào còn lại)
+#### 1. Dataset nhóm em đã đánh giá
+
+Nhóm em chấm 30 câu hỏi trong file `evidence/dataset-v1.jsonl`. Tụi em thiết kế bộ câu hỏi này theo ba trục là loại câu hỏi, mức độ corpus phủ được nội dung, và độ rõ của câu hỏi. Ba trục đó tạo ra 25 ô có ý nghĩa thực tế và nhóm em phủ hết 25 ô. Trong 30 câu có 11 câu nằm trong phạm vi bài học, 12 câu nằm ngoài phạm vi, và 7 câu mơ hồ. Nhóm em cố ý cho nhóm câu ngoài phạm vi và câu mơ hồ chiếm tới 63 phần trăm, bởi vì đó là chỗ tutor dễ mắc lỗi nguy hiểm nhất.
+
+Nhóm em chạy bộ câu hỏi này ba lần trên tutor thật và lưu lại cả ba lần. Lần đầu là bản gốc, hai lần sau là sau khi tụi em sửa system prompt. Mỗi lần chạy đều được ghi trace đầy đủ lên Braintrust.
+
+Blind spot lớn nhất của nhóm em là toàn bộ 30 câu đều do tụi em và AI nghĩ ra, chưa có câu nào lấy từ log của người học thật, vì tutor chưa mở cho học viên dùng. Điểm yếu thứ hai là dataset chỉ có 30 dòng, nên mỗi câu lật kết quả đã làm tỉ lệ đạt xê dịch hơn ba điểm phần trăm. Nhóm em thống nhất coi mọi chênh lệch dưới bảy điểm phần trăm là nhiễu chứ không phải cải thiện thật.
 
 #### 2. Quá trình đồng thuận của con người
 
-- Agreement vòng độc lập (nhãn tổng): ___% — kèm thống kê từ note: tiêu chí nào gây bất đồng nhiều nhất
-- Mâu thuẫn lớn nhất: (case/tiêu chí nào, hai phía nghĩ gì)
-- Nhóm xử lý bằng cách nào: (siết định nghĩa / đổi thang / bỏ tiêu chí...)
+Ba thành viên nhóm em chấm độc lập trên cùng một file kết quả và không ai xem nhãn của người khác. Kết quả là cả ba người cùng chọn một nhãn ở 15 trên 30 câu, tức là mức đồng thuận chỉ đạt 50 phần trăm. Nếu xét từng cặp thì Minh và Hải giống nhau 73 phần trăm, còn Đăng giống hai bạn kia lần lượt 60 phần trăm.
+
+Con số 50 phần trăm này thấp hơn nhiều so với mức 90 phần trăm mà bài giảng đưa ra. Nhóm em không coi đó là chuyện đáng giấu, vì khi đọc kỹ thì tụi em thấy bất đồng không rải đều mà dồn vào một chỗ. Ở nhóm câu mơ hồ, ba người lệch nhau tới 86 phần trăm, còn ở nhóm câu hỏi khái niệm rõ ràng thì chỉ lệch 25 phần trăm.
+
+Mâu thuẫn lớn nhất của nhóm em nằm ở câu sc-07. Học viên hỏi rằng có áp dụng được cho case của em không, và tutor trả lời là có kèm hai trích dẫn đúng. Đăng chấm câu này đạt vì mọi trích dẫn đều khớp nguồn. Minh và Hải chấm chưa rõ vì tutor không hề biết case của học viên là gì mà đã trả lời. Khi ngồi lại với nhau, nhóm em nhận ra hai bên không hề chấm cùng một thứ. Minh và Hải đang chấm chuyện tutor có hỏi lại khi thiếu thông tin hay không, còn Đăng đang chấm chuyện nội dung có đúng với nguồn hay không. Rubric ban đầu của nhóm em không có tiêu chí nào trong hai tiêu chí đó.
+
+Nhóm em xử lý bằng cách siết lại định nghĩa chứ không bỏ phiếu đa số. Tụi em tách hai thứ đang lẫn vào nhau thành hai tiêu chí riêng, đặt tên là C4 cho việc bám nguồn và C6 cho việc hỏi lại. Sau đó nhóm em phân xử từng câu bất đồng bằng bằng chứng trong file kết quả. Người phân xử cuối cùng là cột `expected_behavior` mà chính nhóm em đã viết ở Phase 1, vì có tới 12 câu trong đó ghi rõ tutor phải hỏi lại. Điều này cho thấy tiêu chí của Minh và Hải là thứ nhóm em đã chốt từ trước, chỉ là Đăng không đối chiếu cột đó khi chấm. Ngược lại ở tiêu chí C4 thì Đăng đúng và hai bạn kia bỏ sót, ví dụ rõ nhất là câu sc-06 mà tụi em nói kỹ ở phần dưới.
+
+Sau khi thống nhất, nhãn vàng của nhóm em có 14 câu đạt, 15 câu không đạt và 1 câu chưa kết luận được. Nhãn vàng này giống nhãn cá nhân của Minh 67 phần trăm, của Hải 60 phần trăm và của Đăng 67 phần trăm, nên không thành viên nào bị lấy làm chuẩn thay cả nhóm.
 
 #### 3. LLM judge
 
-- Model judge: ________________
-- Số vòng calibration: ___ — sau đó judge nhận đúng ___% output tốt và bắt đúng ___% output xấu
-- Judge nào không calibrate nổi, vì sao: ________________
+Nhóm em dùng model `gpt-4o-mini` chạy qua OpenRouter làm judge, với nhiệt độ bằng 0. Tụi em cố ý chọn model khác với model của tutor là `deepseek-v4-flash`, để tránh chuyện một model tự chấm bài của chính nó.
 
-#### 4. Bảng quyết định routing (kèm lý giải)
+Nhóm em chạy bốn vòng calibration và mỗi vòng chỉ đổi đúng một thứ. Ở vòng đầu, judge nhận đúng 40 phần trăm số câu tốt và bắt được 89 phần trăm số câu xấu. Đến vòng thứ ba, judge nhận đúng 55 phần trăm số câu tốt và vẫn giữ nguyên khả năng bắt lỗi ở mức 89 phần trăm. Nhóm em chọn bản vòng ba làm bản chính thức, bởi vì với vai trò một cái cổng chặn chất lượng thì việc bỏ sót lỗi nguy hiểm hơn nhiều so với việc báo động nhầm.
 
-| Tiêu chí | Ngưỡng pass | Giao cho | Vì sao (dựa trên số liệu) |
+Điều bất ngờ nhất mà nhóm em gặp nằm ở vòng thứ hai. Con số đồng thuận đứng yên ở 53 phần trăm và tụi em suýt kết luận rằng thay đổi đó vô dụng. Khi so từng dòng thì nhóm em thấy có tới 8 câu đổi kết quả. Bốn câu tutor từ chối đúng đã được judge chấm lại thành đạt như tụi em mong muốn, nhưng bốn câu khác lại tụt từ đạt xuống không đạt. Hai chiều triệt tiêu nhau nên con số tổng không nhúc nhích. Nhóm em chạy lại bốn câu bị tụt hai lần nữa và kết quả vẫn y hệt, nên tụi em xác định đó là tác dụng phụ thật của prompt chứ không phải chuyện ngẫu nhiên. Bài học nhóm em rút ra là không bao giờ được nhìn mỗi con số tổng để kết luận một thay đổi có tác dụng hay không.
+
+Đến vòng thứ tư, nhóm em thử một hướng khác hẳn là đưa toàn văn tài liệu vào cho judge đọc thay vì chỉ đưa đoạn trích ngắn. Kết quả vẫn dừng ở 63 phần trăm, chỉ đổi bớt báo động nhầm lấy thêm bỏ sót. Hai cách làm khác nhau cùng dừng ở một chỗ nên nhóm em kết luận judge đã chạm trần và tụi em dừng lại thay vì ép thêm.
+
+Tiêu chí mà nhóm em không calibrate nổi là chất lượng của ba câu hỏi gợi mở. Lý do rất đơn giản là ba thành viên chỉ chấm một nhãn tổng cho cả câu trả lời chứ chưa bao giờ chấm riêng tiêu chí này, nên tụi em không có chuẩn vàng nào để so. Nhóm em quyết định không chạy judge cho tiêu chí đó, vì chạy ra một con số không kiểm chứng được thì còn tệ hơn là không có số.
+
+#### 4. Bảng quyết định routing
+
+| Tiêu chí | Ngưỡng đạt | Giao cho ai | Vì sao nhóm em chọn như vậy |
 |---|---|---|---|
-| vd: groundedness | ≥90% | LLM judge + audit 10%/tuần | bắt đúng 91% output xấu sau 2 vòng near-miss |
-|  |  |  |  |
-|  |  |  |  |
+| Đúng cấu trúc JSON | 100% | Code tự chấm, dùng làm cổng chặn | Chỉ cần đọc file và đếm trường, chạy đúng 30 trên 30 câu và tốn 0 đồng |
+| Nguồn trích có thật | 100% | Code tự chấm, dùng làm cổng chặn | Chỉ cần tra địa chỉ trong danh mục tài liệu, đúng 30 trên 30 câu |
+| Trích đúng nguyên văn | 95% | Code tự chấm, dùng làm cổng chặn | Code bắt được 7 câu sai mà cả ba thành viên chấm tay đều bỏ sót, vì so từng chữ là việc người làm không xuể |
+| Đủ ba câu gợi mở | 95% | Code tự chấm | Chỉ cần đếm số câu, đúng 30 trên 30 |
+| Không bịa số liệu | 0 ca sai | LLM judge gom nghi vấn, người duyệt lại | Judge bắt được 89% câu xấu nhưng báo động nhầm ở 45% câu tốt, nên chưa đủ tin để tự quyết |
+| Nhận đúng phạm vi câu hỏi | 90% | Code chấm phần cứng, judge chấm phần nghĩa, người duyệt | Code chấm được ràng buộc hình thức và đúng 30 trên 30, nhưng chuyện corpus có phủ câu hỏi hay không thì code chịu |
+| Hỏi lại khi câu hỏi mơ hồ | 50% | Chuyên gia chấm | Ba thành viên còn lệch nhau tới 86% ở nhóm câu này, nên nhóm em không thể kỳ vọng máy chấm ổn định hơn người |
+| Chất lượng câu gợi mở | Chưa đặt | Chưa giao cho ai | Nhóm em chưa có nhãn vàng cho tiêu chí này nên chưa calibrate được |
 
-#### 5. Verdict + bước tiếp theo
+#### 5. Verdict và bước tiếp theo
 
-**Ship / Ship with conditions / Hold** — vì: ________________
+Nhóm em chốt là HOLD. Tụi em đã chốt ngưỡng từ trước khi xem kết quả và ghi lại bằng một commit riêng, nên con số đem ra so là tiêu chuẩn chứ không phải thứ nhóm em thương lượng lại sau khi thấy điểm.
 
-- Nếu Ship: monitoring tuần đầu xem gì, sample bao nhiêu %, alert ở ngưỡng nào?
-- Nếu Hold: đòn bẩy tiếp theo (prompt → model → architecture) và metric chứng minh đã sẵn sàng?
+Ở lần chạy đầu, tutor trượt ba ngưỡng cứng. Nhóm em sửa system prompt rồi chạy lại và tình hình khá lên nhiều. Tỉ lệ đạt ở nhóm câu rủi ro cao tăng từ 21 phần trăm lên 57 phần trăm. Riêng nhóm câu mơ hồ tăng từ 0 phần trăm lên 71 phần trăm, vì tụi em thêm cho tutor một lựa chọn mới là được phép hỏi lại người học. Dù vậy tutor vẫn còn trượt hai ngưỡng, là trích đúng nguyên văn chỉ đạt 80 phần trăm so với mức cần 95 phần trăm, và nhận đúng phạm vi câu hỏi chỉ đạt 58 phần trăm so với mức cần 90 phần trăm.
+
+Đòn bẩy tiếp theo mà nhóm em sẽ kéo không còn là prompt nữa mà là corpus. Tụi em có bằng chứng cho lựa chọn này. Sau khi sửa prompt, tỉ lệ trích sai từ tài liệu văn xuôi giảm từ 22 phần trăm xuống 15 phần trăm, nhưng tỉ lệ trích sai từ bộ slide lại tăng vọt từ 6 phần trăm lên 47 phần trăm. Lý do là nhóm em cấm tutor dùng dấu ba chấm để nối hai đoạn rời, nên nó không nối nữa mà chép nguyên một đoạn dài, mà phần chữ trong bộ slide đã bị làm phẳng và xáo trộn thứ tự nên đoạn càng dài càng dễ sai. Việc cần làm trước tiên là dọn lại phần chữ của bộ slide, sau đó mới tính tới chuyện đổi model hay đổi kiến trúc.
+
+Metric chứng minh nhóm em đã sẵn sàng ship là hai con số sau. Thứ nhất, tỉ lệ trích đúng nguyên văn phải đạt từ 95 phần trăm trở lên. Thứ hai, tỉ lệ nhận đúng phạm vi câu hỏi phải đạt từ 90 phần trăm trở lên, tức là trong 12 câu ngoài phạm vi thì nhiều nhất chỉ được sai một câu. Khi nào cả hai con số đó đạt và nhóm câu rủi ro cao không tụt so với lần chạy này, nhóm em sẽ chuyển sang trạng thái ship kèm điều kiện.
+
+Nếu tới lúc đó nhóm em ship, kế hoạch theo dõi tuần đầu của tụi em gồm ba việc. Nhóm em sẽ lấy ngẫu nhiên 10 phần trăm số lượt hỏi thật để chấm tay mỗi ngày. Nhóm em sẽ theo dõi ba tín hiệu là tỉ lệ câu bị tutor trả lời dù nằm ngoài phạm vi, tỉ lệ câu tutor hỏi lại, và tỉ lệ trích dẫn sai do code tự bắt. Nhóm em sẽ báo động ngay khi tỉ lệ trích dẫn sai vượt 5 phần trăm, hoặc khi tỉ lệ hỏi lại tụt xuống dưới 50 phần trăm, vì tụt như vậy nghĩa là tutor quay lại thói quen đoán ý người học.
 
 ### Câu hỏi tự soi
 
-- Tin cậy nhất ở đâu, đáng lo nhất ở đâu? (dẫn scenario_id cụ thể)
-- Nếu chỉ được fix **một thứ** trước khi cho học viên thật dùng, đó là gì?
-- Eval loop này sẽ chạy lại **khi nào** (mỗi lần đổi prompt? mỗi tuần? khi corpus đổi?) và ai nhìn kết quả?
-- Điều gì trong bài này bạn sẽ **mang về áp dụng** vào sản phẩm thật của mình?
+Chỗ nhóm em tin tưởng nhất là làn kiểm tra bằng code. Ba tiêu chí về cấu trúc, về nguồn có thật và về đủ ba câu gợi mở đều đạt 100 phần trăm qua cả ba lần chạy, lại không tốn đồng nào. Câu sc-10 và sc-25 là ví dụ cho thấy code còn bắt được lỗi mà cả ba thành viên nhóm em đọc tay đều bỏ qua.
+
+Chỗ nhóm em lo nhất là câu sc-06. Học viên hỏi nên chấm tay bao nhiêu dòng và tutor trả lời rằng chấm khoảng 100 đến 300 dòng là hợp lý. Nhóm em tra ngược thì thấy hai tài liệu tutor trích không hề có con số nào. Câu gốc trong sách nói 300 mẫu là mức tối thiểu tuyệt đối, nằm ở một mục khác mà tutor không hề trích. Tutor đã biến một mức sàn thành mức trần. Học viên đọc xong sẽ chấm 100 dòng rồi yên tâm là đủ, và đó là kiểu sai nguy hiểm nhất vì nó nghe rất hợp lý.
+
+Nếu chỉ được sửa một thứ trước khi cho học viên thật dùng, nhóm em sẽ sửa việc tutor trả lời cả những câu nằm ngoài tài liệu. Trong 12 câu ngoài phạm vi thì bản đầu tiên sai tới 8 câu. Đây chính là gốc rễ của những ca bịa số như sc-06, vì khi tutor cố trả lời một câu mà tài liệu không có thì nó buộc phải tự nghĩ ra nội dung.
+
+Nhóm em sẽ chạy lại vòng đánh giá này mỗi khi có ba thay đổi. Thứ nhất là mỗi lần sửa system prompt. Thứ hai là mỗi lần đổi model. Thứ ba là mỗi lần thêm hoặc sửa tài liệu trong corpus. Người xem kết quả là cả ba thành viên, vì ba người nhìn ra ba loại lỗi khác nhau và bài này đã chứng minh điều đó.
+
+Thứ nhóm em mang về áp dụng cho sản phẩm thật là thói quen chốt ngưỡng trước khi xem điểm. Trước đây tụi em hay nhìn kết quả rồi mới bàn xem bao nhiêu là đủ, và như vậy thì lần nào cũng tìm được lý do để cho qua. Thứ hai là thói quen đọc kết quả theo từng nhóm nhỏ. Trong bài này, nếu nhóm em chỉ nhìn con số tổng thì tutor đạt 100 phần trăm ở nhóm câu phổ biến và tụi em đã cho ship, trong khi ở nhóm câu nguy hiểm nhất nó chỉ đạt 29 phần trăm.

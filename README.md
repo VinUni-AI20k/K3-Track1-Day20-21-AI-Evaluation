@@ -1,3 +1,29 @@
+# Track 1 Day 21 — Bài nộp capstone AI Evaluation
+
+## Người nộp và nhóm
+
+Em là Nguyễn Hoàng Minh, mã học viên 2A202601764. Nhóm em có ba người là Nguyễn Hoàng Minh, Nguyễn Việt Hải và Trịnh Hải Đăng.
+
+## Bài nộp nằm ở đâu
+
+Báo cáo chính của nhóm em nằm ở [deliverables/REPORT.md](deliverables/REPORT.md), gồm bảy mục theo bảy phase của bài lab. Toàn bộ dữ liệu thô để đối chiếu lại từng con số nằm trong [deliverables/evidence/](deliverables/evidence/). Phần khai báo dùng AI của em nằm ở [deliverables/ai-support-log.md](deliverables/ai-support-log.md). Link trace của mọi lần chạy nằm ở [deliverables/evidence/braintrust-link.md](deliverables/evidence/braintrust-link.md).
+
+## Verdict tóm tắt
+
+Nhóm em quyết định HOLD, tức là chưa cho AI Tutor ra mắt rộng hơn.
+
+Nhóm em chấm 30 câu hỏi phủ 25 ô trong lưới. Ba thành viên chấm độc lập và chỉ đồng thuận với nhau 50 phần trăm, nên tụi em phải siết lại rubric trước khi tin bất cứ con số nào. Judge của nhóm em sau bốn vòng calibration nhận đúng 55 phần trăm số câu tốt và bắt được 89 phần trăm số câu xấu, đủ để hỗ trợ chứ chưa đủ để tự quyết.
+
+Nhóm em chốt ngưỡng trước khi xem điểm và ghi lại bằng một commit riêng. Ở lần chạy đầu, tutor trượt ba ngưỡng cứng. Sau khi tụi em sửa system prompt và chạy lại, tỉ lệ đạt ở nhóm câu rủi ro cao tăng từ 21 phần trăm lên 57 phần trăm, còn nhóm câu mơ hồ tăng từ 0 phần trăm lên 71 phần trăm. Tutor vẫn còn trượt hai ngưỡng là trích đúng nguyên văn đạt 80 phần trăm so với mức cần 95 phần trăm, và nhận đúng phạm vi câu hỏi đạt 58 phần trăm so với mức cần 90 phần trăm.
+
+Con số làm nhóm em quyết định là tỉ lệ đạt theo từng nhóm nhỏ. Nếu chỉ nhìn nhóm câu phổ biến thì tutor đạt 100 phần trăm và tụi em đã cho ship, nhưng ở nhóm câu rủi ro cao nó chỉ đạt 29 phần trăm ở lần chạy đầu.
+
+## Đóng góp của em trong nhóm
+
+Em dựng môi trường chạy cho cả nhóm, gồm cấu hình provider, bật tracing lên Braintrust và sửa hai lỗi khiến trace bị mất. Em chấm độc lập 30 câu ở vòng đầu và là người phát hiện cụm lỗi tutor không hỏi lại khi thiếu ngữ cảnh. Em viết và calibrate judge qua bốn vòng, viết thêm hai code check cho nhóm, và sửa rule trích dẫn sau khi thấy nó bắt oan. Em cũng là người sửa system prompt của tutor rồi chạy lại ba vòng để đo xem có khá hơn thật không.
+
+---
+
 # K3 Track 1 · Day 20–21 — AI Evaluation (eval-kit)
 
 Repo làm bài capstone **AI Evaluation** của case **VLearn AI Tutor** — trợ giảng trả lời
