@@ -105,6 +105,20 @@ def check_followup_quality(rec):
     return True, None
 
 
+def check_expected_scope_match(rec):
+    """Kiểm tra output.scope có khớp với expected_scope của dataset hay không."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    expected = rec.get("expected_scope")
+    if expected is None:
+        return None, "bỏ qua (không có trường expected_scope)"
+    actual = out.get("scope")
+    if actual != expected:
+        return False, f"lệch scope: actual={actual!r} != expected={expected!r}"
+    return True, None
+
+
 def check_sources_no_duplicates(rec):
     """Đảm bảo không có nguồn trích dẫn trùng lặp (duplicate doc_id + section_id)."""
     out = rec.get("output") or {}
@@ -124,6 +138,7 @@ CHECKS = [
     ("schema_valid", check_schema),
     ("citation_exists", check_citation_exists),
     ("quote_verbatim", check_quote_verbatim),
+    ("expected_scope_match", check_expected_scope_match),
     ("scope_sources_consistency", check_scope_sources_consistency),
     ("followup_quality", check_followup_quality),
     ("sources_no_duplicates", check_sources_no_duplicates),
@@ -134,7 +149,7 @@ def run_checks_on_record(rec, valid_ids, section_tokens):
     """Chạy toàn bộ code checks trên 1 record, trả về dict kết quả {check_name: (bool|None, reason)}."""
     results = {}
     for name, fn in CHECKS:
-        if fn in (check_schema, check_scope_sources_consistency, check_followup_quality, check_sources_no_duplicates):
+        if fn in (check_schema, check_expected_scope_match, check_scope_sources_consistency, check_followup_quality, check_sources_no_duplicates):
             ok, reason = fn(rec)
         elif fn is check_citation_exists:
             ok, reason = fn(rec, valid_ids)

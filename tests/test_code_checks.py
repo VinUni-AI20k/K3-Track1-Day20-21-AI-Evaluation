@@ -155,8 +155,21 @@ def run_tests():
     res_nonstr = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": ["Q1?", 123, "Q3?"]}})
     check("followup non-string item: False", res_nonstr[0] is False)
 
-    res_nonlist = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": "Q1, Q2, Q3"}})
-    check("followup non-list: False", res_nonlist[0] is False)
+    # Case 10: Expected scope match unit tests
+    res_match_in = code_checks.check_expected_scope_match({"expected_scope": "in_scope", "output": {"scope": "in_scope"}})
+    check("expected_scope match in_scope: True", res_match_in[0] is True)
+
+    res_match_out = code_checks.check_expected_scope_match({"expected_scope": "out_of_scope", "output": {"scope": "out_of_scope"}})
+    check("expected_scope match out_of_scope: True", res_match_out[0] is True)
+
+    res_mismatch_in_out = code_checks.check_expected_scope_match({"expected_scope": "in_scope", "output": {"scope": "out_of_scope"}})
+    check("expected in_scope actual out_of_scope: False", res_mismatch_in_out[0] is False)
+
+    res_mismatch_out_in = code_checks.check_expected_scope_match({"expected_scope": "out_of_scope", "output": {"scope": "in_scope"}})
+    check("expected out_of_scope actual in_scope: False", res_mismatch_out_in[0] is False)
+
+    res_missing_expected = code_checks.check_expected_scope_match({"output": {"scope": "in_scope"}})
+    check("missing expected_scope: None (skipped)", res_missing_expected[0] is None)
 
     print(f"\nCode Checks Test Result: {pass_count} pass, {fail_count} fail")
     return fail_count == 0

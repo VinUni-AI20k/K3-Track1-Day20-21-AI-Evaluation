@@ -1,0 +1,128 @@
+{
+  "repository": "Track1_Day21_2A202601873_NguyenQuangHuy",
+  "generated_at": "2026-08-21T12:00:00+07:00",
+  "decision_owner": "Nguyễn Quang Huy (2A202601873)",
+  "annotator": "Lăng Thị Phương Huế (2A202601915)",
+  "artifacts": {
+    "deliverables/evidence/dataset-v1.jsonl": {
+      "sha256": "422849270fedec8c2d3fdbab87c8b3af0807dcf2cd9d93bb8cc9daeda2475629",
+      "size_bytes": 19428,
+      "row_count": 22
+    },
+    "deliverables/evidence/results-v3.jsonl": {
+      "sha256": "81db82596052f989867a06143b23286423b425db9dc845f0f8e0a392abe20412",
+      "size_bytes": 114423,
+      "row_count": 22
+    },
+    "deliverables/evidence/labels-huy.csv": {
+      "sha256": "9e1a18cdbb7f3ce306c257ca6e5ef35520570a689a0ea29086b1266f36ab3271",
+      "size_bytes": 46343,
+      "row_count": 23
+    },
+    "deliverables/evidence/labels-hue.csv": {
+      "sha256": "5ec46a5418c4d28d4c6c6a3cad54608cf793701d6c4279163d8efcfd9c672343",
+      "size_bytes": 45840,
+      "row_count": 23
+    },
+    "deliverables/evidence/labels.csv": {
+      "sha256": "369371dcda85b05b73f9fe7ac4794f6b9c885a26b85239667cd1ebca6866207d",
+      "size_bytes": 2186,
+      "row_count": 23
+    },
+    "deliverables/evidence/labels-followup-huy.csv": {
+      "sha256": "21a0ac45f262fc189833e9f3050eb259b6aa9f7661b4a0aeb10a7daf3d24fb0a",
+      "size_bytes": 2206,
+      "row_count": 23
+    },
+    "deliverables/evidence/labels-followup-hue.csv": {
+      "sha256": "43e70fb706d4c264edc96a8e9b3faca452216b2434ac1a1135f18c9791fef0ac",
+      "size_bytes": 2313,
+      "row_count": 23
+    },
+    "deliverables/evidence/labels-followup-gold.csv": {
+      "sha256": "b98c1725c2321ca834e7a5251f7d34c0581acdce6f28f13f85019d010ee8577b",
+      "size_bytes": 2391,
+      "row_count": 23
+    },
+    "deliverables/evidence/judge-prompt-groundedness-v1.md": {
+      "sha256": "0a304f7e0108c69783f9410fa7f7f1095d1d29cd13d6c305118b60f5d53078f5",
+      "size_bytes": 1942,
+      "row_count": null
+    },
+    "deliverables/evidence/judge-prompt-groundedness-v2.md": {
+      "sha256": "02cbae5eb72253de3e3eb01b6870a452e024b55e98190c9b98205aae76c9d26c",
+      "size_bytes": 2515,
+      "row_count": null
+    },
+    "deliverables/evidence/judge-prompt-followup-v1.md": {
+      "sha256": "ab228ef9ae363c66e86192792ebc6491fb66f59a64f9959c5739c7762be6d465",
+      "size_bytes": 1684,
+      "row_count": null
+    },
+    "deliverables/evidence/judge-prompt-followup-v2.md": {
+      "sha256": "f15d88449ff10a38344bf6e76adca8c57784a5133a661b04b1a903f99135ba26",
+      "size_bytes": 1919,
+      "row_count": null
+    },
+    "deliverables/evidence/verdicts-groundedness-v1.jsonl": {
+      "sha256": "885160595a9be4d4012b7a50b0d2be7d5cf0b16837ba206c2d8573c4b149d517",
+      "size_bytes": 27059,
+      "row_count": 22
+    },
+    "deliverables/evidence/verdicts-groundedness-v2.jsonl": {
+      "sha256": "c5bbbd65f50cb3fa975ba75bdb1d8c41bb6cfdc5ae974055b2a92acfa8719180",
+      "size_bytes": 27482,
+      "row_count": 22
+    },
+    "deliverables/evidence/verdicts-followup-v1.jsonl": {
+      "sha256": "3ff6fee2f51a3180bc6631b38ef7db1913c776ea76ea1da1126651d180da8f6e",
+      "size_bytes": 26756,
+      "row_count": 22
+    },
+    "deliverables/evidence/verdicts-followup-v2.jsonl": {
+      "sha256": "e46687d211f0d6971be55bbbd5c21ba4030276f50284e956318078e64c1b1014",
+      "size_bytes": 26913,
+      "row_count": 22
+    },
+    "deliverables/evidence/thresholds-locked.md": {
+      "sha256": "0fb249e356203af485d2c7510b96433e761c5f1dc6805a76eb7ee27fa878597d",
+      "size_bytes": 3191,
+      "row_count": null
+    },
+    "deliverables/evidence/scorecard-final-real.md": {
+      "sha256": "cc1b7a8977747fad9b416b6285a290bec17f08cb1addf618df4ac8213429b370",
+      "size_bytes": 5965,
+      "row_count": null
+    },
+    "deliverables/evidence/scope-mismatch-audit.md": {
+      "sha256": "d002d73b270969e90f293f0e25ad20e9d7925b827940e24dd9f33cc41e6326a3",
+      "size_bytes": 5894,
+      "row_count": null
+    },
+    "deliverables/evidence/COACH-TWO-PERSON-WAIVER.md": {
+      "sha256": "e213357cb51176ce5d7236a1c4eda5c51da6f3a8a2ee05a614c79d518b95610a",
+      "size_bytes": 2506,
+      "row_count": null
+    },
+    "deliverables/evidence/HUMAN-LABEL-PROVENANCE.md": {
+      "sha256": "b50a189fa88deab37a354c1077107f8dd66ba1f66da875b8a76a8af0fe5bc2ca",
+      "size_bytes": 1782,
+      "row_count": null
+    },
+    "deliverables/REPORT.md": {
+      "sha256": "65dad4866ba492226a4b60c1a5a80da7ff7e8708072ea23850e76291eb267f3e",
+      "size_bytes": 19615,
+      "row_count": null
+    },
+    "ai-support-log.md": {
+      "sha256": "f4ccf2099695cd9e67285c077db37b237b605fe332f203e44669a275be63e709",
+      "size_bytes": 5341,
+      "row_count": null
+    },
+    "README.md": {
+      "sha256": "7f00aff73a5326c0d58f6348315d947b8eb619ea2a10ac9638c40a8e1a016618",
+      "size_bytes": 13911,
+      "row_count": null
+    }
+  }
+}

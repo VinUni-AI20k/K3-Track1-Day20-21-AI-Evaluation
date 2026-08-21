@@ -36,25 +36,25 @@
 
 ---
 
-## 2. Chi Tiết Hiệu Năng Theo Toàn Bộ 14 Lát Cắt (Slices Breakdown)
+## 2. Chi Tiết Hiệu Năng Theo Toàn Bộ 15 Lát Cắt (Slices Breakdown — Code-Generated)
 
 | Lát Cắt Dữ Liệu (Data Slice) | Số Kịch Bản | Semantic Pass (Pass/Total) | Tỷ Lệ Đạt (%) | Exact Scope Tag Match | Đánh Giá |
 |---|---|---|---|---|---|
-| **Toàn bộ Dataset (Overall)** | 22 | **22 / 22** | **100.00%** | **18 / 22 (81.82%)** | **PASS (Audited)** |
-| **Set Type: Representative (Cơ bản)** | 10 | **10 / 10** | **100.00%** | **10 / 10 (100.0%)** | **PASS** |
-| **Set Type: Challenge (Thách thức)** | 6 | **6 / 6** | **100.00%** | **4 / 6 (66.67%)** | **PASS (`sc-07`, `sc-16` audited)** |
-| **Set Type: High-Risk (Rủi ro cao)** | 6 | **6 / 6** | **100.00%** | **4 / 6 (66.67%)** | **PASS (`sc-17`, `sc-19` audited)** |
-| **D1: In-Scope (Theo Dataset Intent)**| 18 | **18 / 18** | **100.00%** | **14 / 18 (77.78%)** | **PASS (4 safe refusals)** |
-| **D1: Out-of-Scope (Thực tế)** | 4 | **4 / 4** | **100.00%** | **4 / 4 (100.00%)** | **PASS (0 OOS misclassified)** |
-| **D2: Fully Supported (Có đủ tài liệu)**| 16 | **16 / 16** | **100.00%** | **15 / 16 (93.75%)** | **PASS** |
-| **D2: Partial Support (Hỗ trợ 1 phần)**| 1 | **1 / 1** | **100.00%** | **0 / 1 (0.00%)** | **PASS (`sc-16` conservative refusal)** |
-| **D2: Unsupported (Ngoài kiến thức)** | 5 | **5 / 5** | **100.00%** | **5 / 5 (100.00%)** | **PASS (`sc-08`, `sc-09`, `sc-17`, `sc-20`, `sc-22`)** |
-| **D3: Ambiguous (Mơ hồ/đa nghĩa)** | 3 | **3 / 3** | **100.00%** | **2 / 3 (66.67%)** | **PASS (`sc-09`, `sc-10`, `sc-19`)** |
-| **D3: Underspecified (Thiếu đại từ)** | 1 | **1 / 1** | **100.00%** | **1 / 1 (100.00%)** | **PASS (`sc-11`)** |
-| **D3: Multi-Intent (Đa ý định)** | 3 | **3 / 3** | **100.00%** | **3 / 3 (100.00%)** | **PASS (`sc-12`, `sc-18`, `sc-21`)** |
-| **D4: Socratic / Answer-Seeking** | 2 | **2 / 2** | **100.00%** | **1 / 2 (50.00%)** | **PASS (`sc-06`, `sc-07` refused homework)** |
-| **D4: False-Premise Correction** | 5 | **5 / 5** | **100.00%** | **4 / 5 (80.00%)** | **PASS (`sc-10`, `sc-13`, `sc-14`, `sc-15`, `sc-19`)** |
-| **D4: Prompt Injection Defense** | 1 | **1 / 1** | **100.00%** | **1 / 1 (100.00%)** | **PASS (`sc-22` defended)** |
+| **Toàn bộ Dataset (Overall)** | 22 | **22 / 22** | **100.00%** | **18 / 22 (81.82%)** | **PASS** |
+| **Set Type: Representative (Cơ bản)** | 10 | **10 / 10** | **100.00%** | **10 / 10 (100.00%)** | **PASS** |
+| **Set Type: Challenge (Thách thức)** | 6 | **6 / 6** | **100.00%** | **4 / 6 (66.67%)** | **PASS** |
+| **Set Type: High-Risk (Rủi ro cao)** | 6 | **6 / 6** | **100.00%** | **4 / 6 (66.67%)** | **PASS** |
+| **D1: In-Scope (Theo Dataset Intent)** | 18 | **18 / 18** | **100.00%** | **14 / 18 (77.78%)** | **PASS** |
+| **D1: Out-of-Scope (Thực tế)** | 4 | **4 / 4** | **100.00%** | **4 / 4 (100.00%)** | **PASS** |
+| **D2: Fully Supported (1 hoặc nhiều nguồn)** | 16 | **16 / 16** | **100.00%** | **14 / 16 (87.50%)** | **PASS** |
+| **D2: Partial Support (Hỗ trợ 1 phần)** | 1 | **1 / 1** | **100.00%** | **0 / 1 (0.00%)** | **PASS** |
+| **D2: Unsupported (Ngoài kiến thức)** | 5 | **5 / 5** | **100.00%** | **4 / 5 (80.00%)** | **PASS** |
+| **D3: Ambiguous (Mơ hồ/đa nghĩa)** | 3 | **3 / 3** | **100.00%** | **2 / 3 (66.67%)** | **PASS** |
+| **D3: Underspecified (Thiếu đại từ)** | 1 | **1 / 1** | **100.00%** | **1 / 1 (100.00%)** | **PASS** |
+| **D3: Multi-Intent (Đa ý định)** | 3 | **3 / 3** | **100.00%** | **3 / 3 (100.00%)** | **PASS** |
+| **D4: Socratic / Answer-Seeking** | 2 | **2 / 2** | **100.00%** | **1 / 2 (50.00%)** | **PASS** |
+| **D4: False-Premise Correction** | 5 | **5 / 5** | **100.00%** | **4 / 5 (80.00%)** | **PASS** |
+| **D4: Prompt Injection Defense** | 1 | **1 / 1** | **100.00%** | **1 / 1 (100.00%)** | **PASS** |
 
 ---
 
