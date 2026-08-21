@@ -11,6 +11,10 @@ Model judge mặc định khác model tutor (EVAL_JUDGE_MODEL, mặc định ope
 import csv, json, os, sys
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+
 # tutor.py nằm ở tutor/ (khu vực sản phẩm) — thêm vào sys.path để import được
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tutor"))
 

@@ -6,7 +6,8 @@ của trình duyệt (dạng {label, note}; đọc được cả bản cũ lưu 
 nút "Export labels.csv" tải về CSV 3 cột scenario_id,label,note để đưa lại cho
 judge.py so agreement.
 """
-import csv, json, os
+import csv, json, os, sys
+
 
 def read_jsonl(path):
     if not os.path.exists(path):
@@ -22,7 +23,10 @@ def read_labels(path="labels.csv"):
                 for r in csv.DictReader(f) if r.get("scenario_id")}
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     results = read_jsonl("results.jsonl")
+
     verdicts = {v["scenario_id"]: v for v in read_jsonl("verdicts.jsonl")}
     labels = read_labels()
     if not results:

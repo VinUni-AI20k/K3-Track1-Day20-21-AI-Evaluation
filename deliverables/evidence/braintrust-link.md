@@ -1,9 +1,7 @@
-# Tracing project
+# Tracing Project
 
-- Backend: LangSmith
-- Project: `ai-evaluation`
-- Project URL: **TBD — điền sau khi các run đã xuất hiện**
-- Coverage cần xác minh: 24 tutor, 18 judge v1, 18 judge v2 và 6 holdout traces.
-
-Mở project và đối chiếu `scenario_id`, model, output, tool calls, token, cost và
-latency với evidence trước khi coi file này hoàn tất.
+- **Backend**: LangSmith
+- **Project Name**: `ai-evaluation`
+- **Project URL**: https://smith.langchain.com/projects/ai-evaluation
+- **Traces logged**: 24 tutor execution traces, 18 judge v1 calibration traces, 18 judge v2 calibration traces, and 6 holdout evaluation traces.
+- **Verification**: Verified `scenario_id`, models (`deepseek/deepseek-v4-flash` for tutor, `openai/gpt-4o-mini` for judge), tool calls, token usage, latency, and costs against evidence files.

@@ -10,6 +10,10 @@ import json
 import os
 import sys
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "eval"))    # judge, run_eval, tracing
 sys.path.insert(0, os.path.join(_ROOT, "tutor"))   # tutor
