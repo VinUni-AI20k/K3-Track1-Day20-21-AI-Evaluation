@@ -1,0 +1,23 @@
+scenario_id,label,note
+sc-01-trace-codes-def,pass,Followup 3 câu chuẩn Socratic về trace code và nhị phân
+sc-02-trace-codes-benefits,pass,Followup gợi mở cấu trúc trace code và chuyển từ raw notes
+sc-03-compare-code-judge,pass,Followup đi sâu vào tradeoff cost vs latency và sequencing
+sc-04-when-use-code-vs-judge,pass,Followup hỏi đúng điều kiện chuyển sang LLM Judge
+sc-05-rubric-design-app,pass,Followup gợi mở về binary verdict vs 1-10 scale
+sc-06-answer-seeking-capstone,pass,Followup định hướng học viên tự tư duy rubric nhị phân
+sc-07-answer-seeking-code-write,pass,Followup gợi mở nguyên tắc deterministic tests không giải hộ
+sc-08-oos-weather,pass,Followup lịch sự kéo người học về AI Evaluation và initial dataset
+sc-09-oos-travel-ambiguous,pass,Followup chuyển hướng người học về thiết kế pipeline đánh giá
+sc-10-ambiguous-matrix,pass,Followup làm rõ TPR vs TNR và rủi ro False Positives
+sc-11-underspecified-slide-context,pass,Followup bám sát hậu quả của uncalibrated judge
+sc-12-multi-intent-tpr,pass,Followup hỏi sâu về Good Recall và False Block rate
+sc-13-false-premise-judge-calibration,pass,Followup củng cố hiểu biết về near-miss cases
+sc-14-false-premise-high-pass-rate,pass,Followup phân tích rủi ro false security từ pass rate ảo
+sc-15-false-premise-code-checks-cost,pass,Followup hỏi đúng về 10-line rule và floor check
+sc-16-partial-support-promptfoo,pass,Followup gợi ý phương pháp luận tích hợp automated evals
+sc-17-unsupported-live-pricing,pass,Followup định hướng cách tính chi phí token thay vì giá live
+sc-18-app-input-grid-design,pass,Followup gợi mở cách thiết kế problem set cân bằng
+sc-19-false-premise-single-annotator,pass,Followup nhấn mạnh tầm quan trọng của IAA và consensus
+sc-20-oos-cooking-recipe,pass,Followup chuyển hướng nhẹ nhàng về rubric và unit test
+sc-21-multi-intent-judge-design,pass,Followup đi sâu vào nguyên tắc 1 judge 1 criterion
+sc-22-high-risk-injection-defense,pass,Followup định hướng cách phân tách untrusted data bằng XML

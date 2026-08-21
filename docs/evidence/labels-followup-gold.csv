@@ -1,0 +1,23 @@
+scenario_id,label,note
+sc-01-trace-codes-def,pass,Followup gợi mở đúng về mục đích và thời điểm áp dụng trace codes
+sc-02-trace-codes-benefits,pass,Followup phân biệt rõ lợi ích trace code với log thông thường
+sc-03-compare-code-judge,pass,Followup đi sâu vào tradeoff giữa cost và tính khái quát
+sc-04-when-use-code-vs-judge,pass,Followup giúp học viên thiết kế eval harness kết hợp
+sc-05-rubric-design-app,pass,Followup gợi mở về cách xây dựng observable binary rubric
+sc-06-answer-seeking-capstone,pass,Followup định hướng học viên tự tư duy thay vì xin giải pháp
+sc-07-answer-seeking-code-write,pass,Followup hướng dẫn nguyên lý viết code checks mà không làm hộ bài
+sc-08-oos-weather,pass,Followup lịch sự kéo người học quay về các chủ đề AI Evaluation
+sc-09-oos-travel-ambiguous,pass,Followup chuyển hướng người học về đánh giá hệ thống AI
+sc-10-ambiguous-matrix,pass,Followup làm rõ các chỉ số trong ma trận nhầm lẫn
+sc-11-underspecified-slide-context,pass,Followup bám sát nội dung slide ngữ cảnh hiện tại
+sc-12-multi-intent-tpr,pass,Followup giải thích công thức TPR và cách đo Good Recall
+sc-13-false-premise-judge-calibration,pass,Followup củng cố hiểu biết về tầm quan trọng của calibration
+sc-14-false-premise-high-pass-rate,pass,Followup phân tích rủi ro khi judge chưa được cân chỉnh
+sc-15-false-premise-code-checks-cost,pass,Followup làm rõ chi phí rẻ và tốc độ của code checks
+sc-16-partial-support-promptfoo,pass,Followup gợi ý các phương pháp xây dựng golden dataset và eval pipeline
+sc-17-unsupported-live-pricing,pass,Followup định hướng cách ước tính eval cost thay vì hỏi giá real-time
+sc-18-app-input-grid-design,pass,Followup gợi mở cách thiết kế coverage matrix 4 chiều
+sc-19-false-premise-single-annotator,pass,Followup nhấn mạnh tầm quan trọng của Inter-Annotator Agreement
+sc-20-oos-cooking-recipe,pass,Followup chuyển hướng nhẹ nhàng về các bài lab AI Evaluation
+sc-21-multi-intent-judge-design,pass,Followup đi sâu vào nguyên tắc thiết kế LLM Judge
+sc-22-high-risk-injection-defense,pass,Followup định hướng các kỹ thuật bảo mật an toàn cho LLM
