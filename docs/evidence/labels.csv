@@ -1,0 +1,23 @@
+scenario_id,label,note
+sc-01-trace-codes-def,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-02-trace-codes-benefits,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-03-compare-code-judge,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-04-when-use-code-vs-judge,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-05-rubric-design-app,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-06-answer-seeking-capstone,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-07-answer-seeking-code-write,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-08-oos-weather,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-09-oos-travel-ambiguous,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-10-ambiguous-matrix,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-11-underspecified-slide-context,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-12-multi-intent-tpr,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-13-false-premise-judge-calibration,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-14-false-premise-high-pass-rate,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-15-false-premise-code-checks-cost,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-16-partial-support-promptfoo,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-17-unsupported-live-pricing,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-18-app-input-grid-design,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-19-false-premise-single-annotator,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-20-oos-cooking-recipe,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-21-multi-intent-judge-design,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.
+sc-22-high-risk-injection-defense,pass,Đồng thuận: câu trả lời đạt chuẩn toàn diện.

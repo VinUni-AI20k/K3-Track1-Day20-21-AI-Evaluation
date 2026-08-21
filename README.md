@@ -1,6 +1,19 @@
 # K3 Track 1 · Day 20–21 — AI Evaluation Lab (VLearn AI Tutor)
 
+[![Live Web Report](https://img.shields.io/badge/Live_Web_Report-GitHub_Pages-blue?style=for-the-badge&logo=github)](https://bietdoibongdem888.github.io/Track1_Day21_2A202601873_NguyenQuangHuy/)
+[![Release Verdict](https://img.shields.io/badge/Release_Verdict-SHIP_(with_divergence)-success?style=for-the-badge)](https://bietdoibongdem888.github.io/Track1_Day21_2A202601873_NguyenQuangHuy/report.html)
+
 Hệ thống Đánh giá Toàn diện (End-to-End AI Evaluation Harness) cho **VLearn AI Tutor** — trợ giảng thông minh trả lời câu hỏi học viên bằng tiếng Việt, dựa trên học liệu khóa học AI Evaluation, trả về JSON chuẩn contract `{scope, answer, sources, followup_questions}`.
+
+---
+
+## 🌐 BÁO CÁO TRỰC TUYẾN (LIVE EVALUATION REPORT)
+
+Trang web báo cáo trực tiếp được xuất bản công khai qua **GitHub Pages**:
+* 🔗 **Public Executive Dashboard**: [https://bietdoibongdem888.github.io/Track1_Day21_2A202601873_NguyenQuangHuy/](https://bietdoibongdem888.github.io/Track1_Day21_2A202601873_NguyenQuangHuy/)
+* 📊 **Full Interactive Evaluation Report**: [https://bietdoibongdem888.github.io/Track1_Day21_2A202601873_NguyenQuangHuy/report.html](https://bietdoibongdem888.github.io/Track1_Day21_2A202601873_NguyenQuangHuy/report.html)
+
+*(Nguồn triển khai: Nhánh `master` / thư mục `/docs`)*
 
 ---
 
@@ -57,6 +70,8 @@ Phase 6: Release Verdict & Report ──► PM Verdict (SHIP with documented div
 
 | Thành phần | Đường dẫn Artifact | Mô tả | Trạng thái kỹ thuật |
 |---|---|---|---|
+| **Web Dashboard** | [`docs/index.html`](docs/index.html) | Giao diện Dashboard trực tuyến GitHub Pages | **LIVE & DEPLOYABLE** |
+| **Interactive Report**| [`docs/report.html`](docs/report.html) | Báo cáo chi tiết 22 kịch bản lọc tương tác | **LIVE & DEPLOYABLE** |
 | **Báo cáo chính A→Z** | [`deliverables/REPORT.md`](deliverables/REPORT.md) | Báo cáo hoàn chỉnh 7 mục từ Input Grid đến Verdict | **Complete & Structured (SHIP with divergence)** |
 | **Nhật ký AI cá nhân** | [`ai-support-log.md`](ai-support-log.md) | Minh bạch phạm vi AI hỗ trợ và quyết định của Huy | **Audited & Personal** |
 | **Mục lục minh chứng** | [`deliverables/evidence/INDEX.md`](deliverables/evidence/INDEX.md) | Bảng tra cứu tất cả các Gate và bằng chứng thực tế | **Complete & Traceable** |
