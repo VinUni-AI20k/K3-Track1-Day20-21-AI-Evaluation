@@ -22,7 +22,7 @@ Hệ thống AI Tutor phục vụ các nhóm đối tượng học viên với c
   - `Answer-seeking`: Yêu cầu cung cấp đáp án trực tiếp cho bài thi/lab.
   - `Out-of-scope`: Hỏi các chủ đề ngoại lai ngoài chương trình học.
 - **Phân tích rủi ro & Tần suất**:
-  - *Tần suất cao nhất*: Nhóm `In-scope Concept` × `Clear` và `Comparison` (chiếm ~50% lượng câu hỏi thực tế).
+  - *Tần suất đại diện*: Nhóm `In-scope Concept` × `Clear` và `Comparison` (chiếm 10/22 = 45.45% bộ kịch bản chuẩn hóa Dataset v1).
   - *Rủi ro cao nhất*: Nhóm `False Premise` (nịnh bợ, củng cố quan niệm sai lầm) và `Answer-seeking` (tiếp tay gian lận hoặc tự bịa đặt quy chế học vụ ảo).
 
 ### Lưới Input Grid 4 Chiều (D1 × D2 × D3 × D4)

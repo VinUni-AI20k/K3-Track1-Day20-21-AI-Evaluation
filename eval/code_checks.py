@@ -1,4 +1,4 @@
-﻿"""Code checks — kiểm tra results.jsonl bằng rule thuần Python (không tốn API).
+"""Code checks — kiểm tra results.jsonl bằng rule thuần Python (không tốn API).
 
 Đây là làn "Code check" của bài lab: những tiêu chí viết được thành rule thì kiểm
 bằng code — nhanh, rẻ, khách quan, chạy lại bao nhiêu lần cũng được.
@@ -89,19 +89,19 @@ def check_scope_sources_consistency(rec):
 
 def check_followup_quality(rec):
     """Kiểm tra cấu trúc câu hỏi gợi ý tiếp theo (followup_questions):
-    - Phải là list các chuỗi không rỗng.
-    - Với in_scope: phải có từ 1 đến 3 câu hỏi gợi ý."""
+    - Phải là list chứa đúng 3 câu hỏi (cả in_scope và out_of_scope).
+    - Mỗi câu hỏi phải là một chuỗi ký tự không rỗng."""
     out = rec.get("output") or {}
     if out.get("_parse_error"):
         return None, "bỏ qua (JSON vỡ)"
     qs = out.get("followup_questions")
     if not isinstance(qs, list):
         return False, "followup_questions phải là một list"
+    if len(qs) != 3:
+        return False, f"followup_questions phải có đúng 3 câu hỏi (hiện có {len(qs)})"
     for q in qs:
         if not isinstance(q, str) or not q.strip():
             return False, "followup_questions chứa phần tử rỗng hoặc không phải string"
-    if out.get("scope") == "in_scope" and len(qs) == 0:
-        return False, "câu in_scope thiếu followup_questions"
     return True, None
 
 

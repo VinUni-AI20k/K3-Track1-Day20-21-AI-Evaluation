@@ -1,12 +1,12 @@
-# VLearn AI Tutor — Phase 1
+> [!NOTE]
+> **HISTORICAL / SUPERSEDED ARTIFACT**: Thư mục `evals/phase1/` là bản nháp scaffolding ban đầu từ Phase 1.
+> Toàn bộ artifacts chuẩn hóa chính thức (Canonical Dataset v1, Corpus Audit, Checkpoints A & B) đã được hợp nhất và lưu trữ tại [`deliverables/evidence/`](../../deliverables/evidence/) và [`deliverables/REPORT.md`](../../deliverables/REPORT.md).
+
+# VLearn AI Tutor — Phase 1 (Historical Archive)
 
 ## Status
 
-`STATUS: PROPOSED — HUMAN DECISION REQUIRED`
-
-`GATE 1: BLOCKED`
-
-This directory is a governance-first Phase 1 packet. It does not claim human approval, corpus evidence, Tutor traces, runtime results, or final Dataset v1 status.
+`STATUS: HISTORICAL / SUPERSEDED BY DELIVERABLES/EVIDENCE/`
 
 ## Workspace audit
 

@@ -54,15 +54,29 @@ def main():
                  "  OPENAI_API_KEY=sk-...     (cho model openai/*)\n"
                  "rồi chạy lại." % tutor.MODEL)
 
+    existing = {}
+    if os.path.exists("results.jsonl"):
+        for r in read_jsonl("results.jsonl"):
+            if r.get("scenario_id") and "output" in r and not r.get("error") and not r.get("output", {}).get("_parse_error"):
+                existing[r["scenario_id"]] = r
+        if existing:
+            print(f"Đã có sẵn {len(existing)} scenarios hợp lệ trong results.jsonl (sẽ tiếp tục các câu còn lại)")
+
     rows = read_jsonl(dataset_path)
     print("Dataset: %d câu | model: %s" % (len(rows), tutor.MODEL))
     results, total_cost, t_start = [], 0.0, time.time()
 
     for i, row in enumerate(rows, 1):
         q = row["input"]
+        sid = row.get("scenario_id") or row.get("id") or "row-%d" % i
+        if sid in existing:
+            print("[%d/%d] %s ... [đã có sẵn kết quả hợp lệ]" % (i, len(rows), q[:60]))
+            results.append(existing[sid])
+            continue
+
         print("[%d/%d] %s ... " % (i, len(rows), q[:60]), end="", flush=True)
         rec = {
-            "scenario_id": row.get("scenario_id") or row.get("id") or "row-%d" % i,
+            "scenario_id": sid,
             "input": q,
             "expected_scope": row.get("expected_scope"),
             "note": row.get("note"),

@@ -1,4 +1,4 @@
-﻿import sys, os
+import sys, os
 from pathlib import Path
 
 # Add eval and tutor to sys.path
@@ -45,19 +45,24 @@ def run_tests():
     check("perfect in_scope: followup_quality", res["followup_quality"][0] is True)
     check("perfect in_scope: sources_no_duplicates", res["sources_no_duplicates"][0] is True)
 
-    # Case 2: Perfect out_of_scope record
+    # Case 2: Perfect out_of_scope record (with exactly 3 followup questions)
     rec_perfect_out = {
         "scenario_id": "test-02",
         "output": {
             "scope": "out_of_scope",
             "answer": "Câu hỏi này nằm ngoài phạm vi khóa học AI Evaluation.",
             "sources": [],
-            "followup_questions": ["Bạn có muốn tìm hiểu về AI Eval Lifecycle không?"]
+            "followup_questions": [
+                "Bạn có muốn tìm hiểu về AI Eval Lifecycle không?",
+                "Bạn có muốn tìm hiểu về cách thiết kế rubric không?",
+                "Bạn có muốn tìm hiểu về LLM-as-a-judge không?"
+            ]
         }
     }
     res = code_checks.run_checks_on_record(rec_perfect_out, valid_ids, section_tokens)
     check("perfect out_of_scope: schema_valid", res["schema_valid"][0] is True)
     check("perfect out_of_scope: scope_sources_consistency", res["scope_sources_consistency"][0] is True)
+    check("perfect out_of_scope: followup_quality", res["followup_quality"][0] is True)
 
     # Case 3: Broken JSON / parse error
     rec_broken = {
@@ -83,7 +88,7 @@ def run_tests():
             "scope": "in_scope",
             "answer": "Test",
             "sources": [{"doc_id": "non-existent-doc", "section_id": "fake-sec", "quote": "fake"}],
-            "followup_questions": ["Q1?"]
+            "followup_questions": ["Q1?", "Q2?", "Q3?"]
         }
     }
     res = code_checks.run_checks_on_record(rec_fake_cit, valid_ids, section_tokens)
@@ -96,7 +101,7 @@ def run_tests():
             "scope": "in_scope",
             "answer": "Test",
             "sources": [{"doc_id": "ai-evals-m09", "section_id": "why-calibration-is-the-whole-game", "quote": "This sentence definitely does not exist in module 9"}],
-            "followup_questions": ["Q1?"]
+            "followup_questions": ["Q1?", "Q2?", "Q3?"]
         }
     }
     res = code_checks.run_checks_on_record(rec_hallu_quote, valid_ids, section_tokens)
@@ -109,7 +114,7 @@ def run_tests():
             "scope": "out_of_scope",
             "answer": "Out of scope but citing",
             "sources": [{"doc_id": "ai-evals-m09", "section_id": "why-calibration-is-the-whole-game", "quote": "Teams skip this step constantly"}],
-            "followup_questions": ["Q1?"]
+            "followup_questions": ["Q1?", "Q2?", "Q3?"]
         }
     }
     res = code_checks.run_checks_on_record(rec_inconsistent, valid_ids, section_tokens)
@@ -125,11 +130,33 @@ def run_tests():
                 {"doc_id": "ai-evals-m09", "section_id": "why-calibration-is-the-whole-game", "quote": "Teams skip this step constantly"},
                 {"doc_id": "ai-evals-m09", "section_id": "why-calibration-is-the-whole-game", "quote": "Teams skip this step constantly"}
             ],
-            "followup_questions": ["Q1?"]
+            "followup_questions": ["Q1?", "Q2?", "Q3?"]
         }
     }
     res = code_checks.run_checks_on_record(rec_dup, valid_ids, section_tokens)
     check("duplicate sources: sources_no_duplicates is False", res["sources_no_duplicates"][0] is False)
+
+    # Case 9: Negative follow-up tests (0, 1, 2, 4 questions, empty/non-string)
+    res_0 = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": []}})
+    check("followup 0 items: False", res_0[0] is False)
+
+    res_1 = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": ["Q1?"]}})
+    check("followup 1 item: False", res_1[0] is False)
+
+    res_2 = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": ["Q1?", "Q2?"]}})
+    check("followup 2 items: False", res_2[0] is False)
+
+    res_4 = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": ["Q1?", "Q2?", "Q3?", "Q4?"]}})
+    check("followup 4 items: False", res_4[0] is False)
+
+    res_empty = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": ["Q1?", "", "Q3?"]}})
+    check("followup empty string item: False", res_empty[0] is False)
+
+    res_nonstr = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": ["Q1?", 123, "Q3?"]}})
+    check("followup non-string item: False", res_nonstr[0] is False)
+
+    res_nonlist = code_checks.check_followup_quality({"output": {"scope": "in_scope", "followup_questions": "Q1, Q2, Q3"}})
+    check("followup non-list: False", res_nonlist[0] is False)
 
     print(f"\nCode Checks Test Result: {pass_count} pass, {fail_count} fail")
     return fail_count == 0
