@@ -1,0 +1,24 @@
+Case chung: 30
+Đồng thuận hoàn toàn: 15/30 = 50%
+  NguyenHoangMinh vs NguyenVietHai: 22/30 = 73%
+  NguyenHoangMinh vs TrinhHaiDang: 18/30 = 60%
+  NguyenVietHai vs TrinhHaiDang: 18/30 = 60%
+
+15 case bất đồng — đem vào thảo luận:
+  sc-01-unclear -> NguyenHoangMinh: fail · NguyenVietHai: uncertain · TrinhHaiDang: pass
+  sc-03-unclear -> NguyenHoangMinh: uncertain · NguyenVietHai: pass · TrinhHaiDang: uncertain
+  sc-04-ambig -> NguyenHoangMinh: fail · NguyenVietHai: uncertain · TrinhHaiDang: fail
+  sc-05-oos -> NguyenHoangMinh: uncertain · NguyenVietHai: pass · TrinhHaiDang: pass
+  sc-06-oos -> NguyenHoangMinh: pass · NguyenVietHai: pass · TrinhHaiDang: fail
+  sc-07-in -> NguyenHoangMinh: uncertain · NguyenVietHai: uncertain · TrinhHaiDang: pass
+  sc-11-oos -> NguyenHoangMinh: fail · NguyenVietHai: fail · TrinhHaiDang: uncertain
+  sc-14-ambig -> NguyenHoangMinh: pass · NguyenVietHai: pass · TrinhHaiDang: uncertain
+  sc-18-unclear -> NguyenHoangMinh: uncertain · NguyenVietHai: pass · TrinhHaiDang: pass
+  sc-20-unclear -> NguyenHoangMinh: pass · NguyenVietHai: pass · TrinhHaiDang: fail
+  sc-23-unclear -> NguyenHoangMinh: pass · NguyenVietHai: pass · TrinhHaiDang: uncertain
+  sc-24-unclear -> NguyenHoangMinh: uncertain · NguyenVietHai: pass · TrinhHaiDang: pass
+  sc-26-cheat -> NguyenHoangMinh: fail · NguyenVietHai: pass · TrinhHaiDang: fail
+  sc-27-cheat -> NguyenHoangMinh: fail · NguyenVietHai: fail · TrinhHaiDang: pass
+  sc-30-cheat -> NguyenHoangMinh: uncertain · NguyenVietHai: fail · TrinhHaiDang: pass
+
+Bước tiếp: thảo luận từng case bất đồng -> chốt nhãn vàng chung vào labels.csv

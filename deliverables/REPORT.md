@@ -124,60 +124,159 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 
 ## 3. Rubric v1
 
-> Rubric = định nghĩa "đủ tốt" mà cả team chấm giống nhau. Thu hẹp scope trước khi
-> viết tiêu chí.
+> Rubric = định nghĩa "đủ tốt" mà cả team chấm giống nhau.
 
-- Tutor trả lời một câu in-scope **"đủ tốt"** khi nào? Viết bằng 1–2 câu ai cũng hiểu.
-- Liệt kê các **tiêu chí chấm** (gợi ý: groundedness, citation đúng format, đúng scope,
-  chất lượng sư phạm, follow-up có giá trị...). Mỗi tiêu chí: pass/fail thế nào, ví dụ
-  pass, ví dụ fail.
-- Tiêu chí nào là **blocker** (fail là cả lượt fail)? Tiêu chí nào chỉ là "điểm cộng"?
-- Với câu out-of-scope, hành vi nào được coi là pass? (từ chối + gợi ý chủ đề liên quan?)
-- Bạn đã thử chấm chéo với ai chưa? Hai người chấm lệch nhau ở tiêu chí nào, sửa rubric
-  ra sao sau đó?
+**"Đủ tốt" là gì (1 câu):** Tutor trả lời đúng phạm vi câu hỏi, mọi khẳng định — đặc
+biệt là con số — truy được về đúng section đã trích nguyên văn, và khi câu hỏi thiếu
+ngữ cảnh thì hỏi lại thay vì đoán hộ học viên.
 
-### Rubric của bạn
+### Rubric v1 — 7 tiêu chí
 
-| Tiêu chí | Pass khi | Fail khi | Blocker? |
+| ID | Tiêu chí | Pass khi | Fail khi | Blocker? |
+|---|---|---|---|---|
+| **C1** | `schema_valid` | Output parse được JSON và đủ 4 field `scope/answer/sources/followup_questions` | JSON vỡ, thiếu field | ✅ Blocker |
+| **C2** | `citation_exists` | Mọi `doc_id#section_id` trong `sources` tồn tại thật trong manifest | Trích nguồn không có thật | ✅ Blocker |
+| **C3** | `quote_verbatim` | Chuỗi `quote` nằm nguyên văn trong section đã cite | Quote ghép 2 đoạn rời bằng "...", hoặc sửa chữ | ✅ Blocker |
+| **C4** | `grounded_claims` | Mọi con số/khẳng định cụ thể truy được về section **đã cite** | Bê số từ section khác, hoặc đảo nghĩa nguồn | ✅ Blocker |
+| **C5** | `scope_handling` | Câu ngoài corpus → `scope="out_of_scope"`, `sources=[]`, từ chối khéo | Trả lời như in_scope dù corpus không có | ✅ Blocker |
+| **C6** | `clarification` | Câu thiếu referent/ngữ cảnh → hỏi lại trước khi trả lời | Tự đoán ý học viên rồi giảng | ✅ Blocker |
+| **C7** | `followup_quality` | Đúng 3 câu, dẫn dắt đào sâu bài học | Thiếu/thừa câu, hỏi lệch chủ đề | ➖ Điểm cộng |
+
+**Luật chấm tổng:** bất kỳ blocker nào fail → cả lượt fail. Không blocker nào fail nhưng
+còn nghi vấn không kết luận được → uncertain.
+
+**Câu out-of-scope pass khi nào:** `scope="out_of_scope"` + `sources=[]` + từ chối khéo
++ gợi ý 1–2 chủ đề có trong corpus. Riêng câu xin đáp án bài tập: không được đưa đáp án
+trực tiếp, kể cả khi corpus có nội dung đó (đây là ràng buộc sản phẩm, không phải ràng
+buộc kiến thức).
+
+### Ba tiêu chí sinh ra từ bất đồng Phase 2
+
+Agreement vòng độc lập chỉ **50%** (15/30). Đọc note thì thấy nguyên nhân không phải ai
+chấm sai, mà là **ba người soi ba trục khác nhau mà rubric chưa hề ghi**:
+
+| Cụm bất đồng | Ai phát hiện | Thành tiêu chí |
+|---|---|---|
+| Tutor không hỏi lại khi câu hỏi thiếu ngữ cảnh (sc-01, sc-07, sc-11, sc-24) | Minh, Hải | **C6** |
+| Tutor bịa/đảo nghĩa con số (sc-04 "trên 92%", sc-06 "100–300 dòng") | Đăng | **C4** |
+| Tutor giảng luôn nội dung bài tập thay vì từ chối (sc-26, sc-27, sc-30) | Minh, Hải | **C5** (mở rộng cho câu xin đáp án) |
+
+**Ai đúng trong tranh cãi C6?** Trọng tài không phải là bỏ phiếu đa số, mà là cột
+`expected_behavior` mà chính nhóm đã viết ở Phase 1: **17/30 row** ghi rõ tutor phải
+"hỏi lại"/"làm rõ"/"không đoán bừa". Tức tiêu chí của Minh và Hải là thứ nhóm đã chốt
+từ trước; Đăng chỉ là không đối chiếu cột đó khi chấm. Ngược lại, ở C4 thì Đăng đúng và
+hai người kia bỏ sót ca bịa số thật (sc-06).
+
+### Ví dụ neo cho từng tiêu chí gây tranh cãi
+
+| Tiêu chí | Pass rõ | Fail rõ | Borderline |
 |---|---|---|---|
-| | | | |
+| **C4** | `sc-10` — giải thích trace vs transcript, mọi ý đều nằm trong section đã cite | `sc-06` — nguồn nói "300 examples is the absolute minimum", tutor viết "chấm 100 đến 300 dòng là hợp lý" (biến sàn thành trần), và số 100/300 **không** có trong 2 section đã cite | `sc-04` — số 92% có thật trong corpus nhưng ở s22, PRD của sản phẩm khác; section đã cite (s49) ghi >90% |
+| **C6** | — (không row nào đạt) | `sc-03` — user chỉ viết "Em nên làm sao đây ạ 😅", tutor giảng luôn định nghĩa offline eval | `sc-14` — tutor trả lời ý 1, bỏ ý 2 của user; thiếu chứ không bịa → uncertain |
+| **C5** | `sc-17` — từ chối đúng, `sources=[]` | `sc-26` — đưa thẳng 3 dimension cho bài Phase 1 | `sc-27` — không đưa đáp án trực tiếp nhưng cũng không từ chối, vẫn trả `in_scope` |
 
 ---
 
 ## 4. Routing Map
 
-> Cái gì kiểm bằng code, cái gì cần LLM judge, cái gì phải đến tay expert. Không phải
-> tiêu chí nào cũng cần LLM.
+> Cái gì kiểm bằng code, cái gì cần LLM judge, cái gì phải đến tay expert.
 
-- Với từng tiêu chí trong rubric (mục 3 ở trên): kiểm tra bằng **code** (deterministic), **LLM
-  judge**, hay **con người**? Vì sao?
-- Tiêu chí nào bạn ban đầu định cho LLM judge chấm nhưng hoá ra code kiểm được rẻ hơn
-  (ví dụ: output có parse được JSON không, sources có đủ doc_id hợp lệ không)?
-- Tiêu chí nào LLM judge **không tin được** và phải giữ cho con người?
-- Judge prompt của bạn (`eval/judge_prompt.md`) chấm tiêu chí nào? Nhiệt độ, model judge là
-  gì, vì sao chọn khác model của tutor?
+### Chẩn đoán spec gap vs generalization gap
+
+| Lỗi quan sát được | Chẩn đoán | Vì sao |
+|---|---|---|
+| Không hỏi lại khi thiếu ngữ cảnh (**0/7** câu `unclear`) | **Spec gap** | `SYSTEM_PROMPT` không có một chữ nào về việc hỏi lại. Nó chỉ cho 2 lựa chọn: `in_scope` hoặc `out_of_scope`. Model không thể làm điều chưa ai bảo nó làm → **sửa prompt trước, chưa cần eval** |
+| Câu ngoài corpus vẫn trả in_scope (**8/12**) | **Generalization gap** | Prompt đã ghi rõ "corpus không có thông tin → xem là out_of_scope", model vẫn không nhất quán → **ứng viên cho eval tự động** |
+| Quote ghép 2 đoạn rời bằng "..." (**12/30**) | **Spec gap** | Prompt nói "trích NGUYÊN VĂN" nhưng không cấm dấu lược "..." → siết prompt |
+| Bê số từ section khác (sc-04, sc-06) | **Generalization gap** | Prompt đã cấm bịa số rất rõ, model vẫn vi phạm → **eval tự động + audit người** |
+
+Ba lỗi lớn nhất hiện là **spec gap** — nghĩa là đòn bẩy rẻ nhất lúc này là sửa
+`SYSTEM_PROMPT`, không phải thêm eval.
 
 ### Bảng routing
 
-| Tiêu chí | Code | LLM judge | Con người | Lý do |
-|---|---|---|---|---|
-| | | | | |
+| Tiêu chí | Code | LLM judge | LLM assist | Expert | Lý do (dựa trên số liệu) |
+|---|---|---|---|---|---|
+| **C1** `schema_valid` | ✅ | | | | Rule thuần: parse JSON + so set field. **30/30 pass**, chi phí $0. Giao cho LLM là lãng phí |
+| **C2** `citation_exists` | ✅ | | | | Tra `(doc_id, section_id)` trong manifest — nhị phân, không cần ngữ nghĩa. **30/30 pass** |
+| **C3** `quote_verbatim` | ✅ | | | | So chuỗi token, deterministic. **Bắt được 12/30 lỗi mà cả 3 người chấm tay đều bỏ sót** — bằng chứng mạnh nhất cho làn Code |
+| **C4** `grounded_claims` | | ✅ | | audit 20% | Cần đọc ngữ nghĩa: "trên 92%" vs ">90%" chỉ sai khi hiểu nguồn. Code không làm được. Giữ audit vì đây là lỗi hại người học nhất |
+| **C5** `scope_handling` | ⚠️ một phần | ✅ | | | Code kiểm được ràng buộc cứng (`out_of_scope` thì `sources` phải rỗng); còn "câu này corpus có phủ không" cần judge |
+| **C6** `clarification` | | | ✅ | ✅ | **Người còn disagree 86% ở nhóm `unclear`** → theo luật lab, chưa đủ chín để giao judge. Máy gom nghi vấn, người quyết. Xét lại sau khi sửa prompt |
+| **C7** `followup_quality` | ✅ đếm | ✅ chất lượng | | | Code đếm đủ 3 câu (**30/30 pass**); chất lượng dẫn dắt thì cần judge |
+
+**Tiêu chí tưởng cần LLM nhưng code rẻ hơn:** C3 `quote_verbatim`. Ban đầu nhóm định
+gộp vào groundedness cho judge chấm, nhưng nó chỉ là so chuỗi token — và hoá ra đây là
+check bắt được nhiều lỗi nhất (12/30) với chi phí $0.
+
+**Tiêu chí không tin được judge:** C6 `clarification`. Ba người còn chấm lệch nhau 86%
+ở nhóm câu `unclear` thì không thể kỳ vọng judge chấm ổn định hơn — judge sẽ chỉ học lại
+sự mơ hồ của rubric.
+
+**Judge prompt:** hiện `eval/judge_prompt.md` mới chấm **groundedness** (gộp C4 + một
+phần C5). Model judge `openrouter/openai/gpt-4o-mini`, `temperature=0`, khác model tutor
+(`openrouter/deepseek/deepseek-v4-flash`) để tránh model tự chấm bài của chính mình —
+model có xu hướng ưu ái output do chính kiến trúc nó sinh ra.
 
 ---
 
 ## 5. Calibration Report
 
-> Judge chỉ đáng tin khi đã calibrate với chuẩn vàng của con người. Đây là minh chứng
-> cho việc đó.
+> Judge chỉ đáng tin khi đã calibrate với chuẩn vàng của con người.
 
-- Bạn đã **gán nhãn tay** bao nhiêu row? (labels.csv, export từ report.html)
-- Chạy `python3 eval/judge.py`: **agreement** giữa judge và nhãn người là bao nhiêu %? Dán
-  confusion matrix vào đây.
-- Judge **sai ở đâu**? (chặt quá / lỏng quá / lệch ở nhóm câu nào — in-scope hay
-  out-of-scope?)
-- Bạn đã sửa `eval/judge_prompt.md` thế nào sau vòng calibrate đầu? Agreement sau sửa?
-- Kết luận: judge của bạn **đủ tin để chấm tự động tiêu chí nào**, và tiêu chí nào vẫn
-  phải giữ cho người?
+### Phần A — Human baseline (Phase 2, đã xong)
+
+- **Gán nhãn tay: 30/30 row**, ba thành viên chấm độc lập trên cùng
+  `evidence/results-v1.jsonl` (không ai xem nhãn của nhau).
+  File: `labels-NguyenHoangMinh.csv`, `labels-NguyenVietHai.csv`, `labels-TrinhHaiDang.csv`.
+- **Human–human agreement vòng độc lập: 15/30 = 50%** (đo trước khi đồng thuận).
+
+| Cặp | Agreement |
+|---|---|
+| Minh vs Hải | 22/30 = 73% |
+| Minh vs Đăng | 18/30 = 60% |
+| Hải vs Đăng | 18/30 = 60% |
+| **Cả 3 trùng nhau** | **15/30 = 50%** |
+
+Mốc lab đưa ra là >90% — nhóm còn cách rất xa, và đó là thông tin có giá trị chứ không
+phải lỗi cần che: theo luật lab, **tiêu chí mà người còn disagree >20% thì chưa sẵn sàng
+giao cho LLM judge**.
+
+**Bất đồng tập trung ở đâu** (không rải đều):
+
+| Slice | Bất đồng | Đọc ra điều gì |
+|---|---|---|
+| `expected_scope = unclear` | **6/7 = 86%** | Rubric chưa định nghĩa tutor phải làm gì khi câu hỏi mơ hồ |
+| `loai_cau_hoi = ap_dung` | **6/7 = 86%** | Câu "áp vào case của em" — không rõ chấm theo kiến thức hay theo hành vi hỏi lại |
+| `do_ro = mo_ho` | 5/7 = 71% | |
+| `khai_niem` | 2/8 = 25% | Câu hỏi khái niệm rõ ràng thì nhóm chấm rất giống nhau |
+| `ngoai_bai` | **0/2 = 0%** | Câu ngoài bài quá hiển nhiên, không ai lệch |
+
+**Độ chặt từng người** — cùng một dataset, ba mức khắt khe khác nhau:
+
+| Người | pass | fail | uncertain | Là "phiếu lẻ" |
+|---|---|---|---|---|
+| Minh | 18 | 6 | 6 | 3 case |
+| Hải | 23 | 4 | 3 | 3 case |
+| Đăng | 21 | 5 | 4 | **7 case** |
+
+Đăng lệch nhóm gấp đôi hai người kia — không phải vì chấm ẩu, mà vì Đăng là người
+duy nhất soi **tính đúng đắn của nội dung** (C4), trục mà hai người kia không kiểm.
+
+**Mâu thuẫn lớn nhất:** `sc-07` — cùng một output, Đăng cho `pass` ("khớp 2 citation"),
+Minh và Hải cho `uncertain` ("model không hỏi case cụ thể là gì"). Hai bên đều đúng theo
+trục của mình; rubric v1 cũ không có trục nào trong hai.
+
+**Nhóm xử lý bằng cách nào:** không hoà giải bằng bỏ phiếu. Tách trục ẩn thành hai tiêu
+chí tường minh (**C4 grounded_claims** và **C6 clarification**), rồi phân xử từng case
+bằng bằng chứng trong `results-v1.jsonl` + cột `expected_behavior` của dataset Phase 1.
+Chi tiết 15 case: `evidence/agreement-v1.md`.
+
+**Nhãn vàng sau đồng thuận** (`evidence/labels.csv`): **15 fail · 14 pass · 1 uncertain**.
+Trùng khớp với nhãn cá nhân: Minh 67%, Hải 60%, Đăng 67% — không thành viên nào được
+ưu tiên làm chuẩn.
+
+### Phần B — Judge calibration (Phase 4, CHƯA CHẠY)
 
 ### Confusion matrix (dán output judge.py)
 
