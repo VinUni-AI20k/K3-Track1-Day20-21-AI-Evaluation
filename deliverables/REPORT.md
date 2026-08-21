@@ -12,18 +12,35 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 > Lưới input = trục "ai hỏi" × "hỏi kiểu gì". LLM giúp sinh input, con người kiểm soát
 > coverage. Trả lời các câu hỏi sau rồi vẽ lưới của bạn.
 
-- AI Tutor của bạn phục vụ những **nhóm người dùng** nào? (học viên mới, học viên đang
-  làm bài, học viên ôn lại, PM khác team...?)
-- Mỗi nhóm có những **ý định (intent)** hỏi nào? (hỏi khái niệm, xin ví dụ, hỏi ngoài
-  lề, xin đáp án, hỏi mơ hồ...?)
-- Ô nào trong lưới là **rủi ro cao** nhất (trả lời sai thì hại người học)? Ô nào **tần
-  suất cao** nhất?
+- **AI Tutor của bạn phục vụ những nhóm người dùng nào?**
+  - **Học viên mới bắt đầu (Beginners)**: Cần tìm hiểu định nghĩa, lý thuyết, khái niệm nền tảng (vibe check, offline evals, calibration).
+  - **Học viên đang làm bài tập / Capstone (Practitioners)**: Cần code mẫu, hướng dẫn sửa lỗi, lời khuyên thiết kế hệ thống eval thực tế (rubric, dataset).
+  - **Học viên ôn tập / So sánh (Reflectors)**: Cần liên kết kiến thức, so sánh các phương pháp (code-based vs LLM judge) hoặc công cụ (Braintrust vs LangSmith).
+
+- **Mỗi nhóm có những ý định (intent) hỏi nào?**
+  - `khai_niem` (Concept): Hỏi định nghĩa lý thuyết.
+  - `so_sanh` (Comparison): So sánh các kỹ thuật hoặc công cụ.
+  - `xin_loi_khuyen_ap_dung` (Apply advice): Hỏi giải pháp cho bài toán thực tế.
+  - `ngoai_scope` (Out-of-scope): Hỏi lạc đề khóa học ( Jenkins, thời tiết...).
+  - `xin_dap_an` (Cheat/Get Answer): Xin trực tiếp/gián tiếp code, file nộp, nhãn chấm.
+
+- **Ô nào trong lưới là rủi ro cao nhất (trả lời sai thì hại người học)? Ô nào tần suất cao nhất?**
+  - **Ô rủi ro cao nhất (High-risk)**:
+    - `xin_dap_an` × `khong_co`: Nếu tutor bịa đáp án sai sẽ làm học viên trượt bài, hoặc nếu tutor cung cấp code/đáp án trực tiếp sẽ vi phạm tính liêm chính học thuật.
+    - `khai_niem` × `khong_co` (các khái niệm ngoài bài học nhưng nghe rất liên quan như RAG Triad): Tutor dễ bị ảo giác (hallucination) tự bịa định nghĩa ngoài tài liệu rồi gắn mác "có trong slide".
+  - **Ô tần suất cao nhất (High-frequency)**:
+    - `khai_niem` × `truc_tiep` (học khái niệm cơ bản trực tiếp trong slide).
+    - `xin_loi_khuyen_ap_dung` × `rai_rac_tong_hop` (xin hướng dẫn thiết kế eval cho chatbot/RAG).
 
 ### Lưới của bạn
 
-| Nhóm user \ Intent | ... | ... | ... |
-|---|---|---|---|
-| ... | | | |
+| Ý định (Intent) \ Độ phủ (Coverage) | truc_tiep | rai_rac_tong_hop | mot_phan_gioi_han | khong_co |
+|---|---|---|---|---|
+| **khai_niem** (Concept) | Representative (sc-01, sc-02) | Challenge + Deixis (sc-07, sc-08) | - | High-risk Hallucinate (sc-17, sc-18) |
+| **so_sanh** (Comparison) | - | Representative (sc-04) / Challenge (sc-09, sc-10) | Challenge (sc-25, sc-26) | - |
+| **xin_loi_khuyen_ap_dung** (Apply) | - | Challenge (sc-11, sc-12) | Representative (sc-05, sc-06) / Challenge + Wrong Assumption (sc-21, sc-22) | - |
+| **ngoai_scope** (Out-of-scope) | - | - | - | High-risk Refusal (sc-15, sc-16) |
+| **xin_dap_an** (Cheat) | - | - | - | High-risk Refusal (sc-13, sc-14, sc-23, sc-24) |
 
 ---
 
@@ -31,19 +48,61 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 
 > Dataset là "bộ đề thi" của tutor. Nêu rõ nó phủ những ô nào trong input-grid.
 
-- `dataset.jsonl` của bạn có **bao nhiêu câu**? Mỗi câu thuộc ô nào trong lưới input?
-- Tỉ lệ in-scope / out-of-scope / mơ hồ / adversarial (xin đáp án, prompt injection)
-  là bao nhiêu? Vì sao chọn tỉ lệ đó?
-- Câu nào bạn **lấy từ trace thật** (người dùng thật hỏi), câu nào do bạn/LLM sinh ra?
-- Ai đã **review** dataset? Phát hiện gì khi review (câu trùng ý, câu quá dễ, thiếu ô
-  rủi ro cao)?
-- Nếu chỉ được giữ 10 câu, bạn giữ 10 câu nào? Vì sao?
+- **`dataset.jsonl` của bạn có bao nhiêu câu? Mỗi câu thuộc ô nào trong lưới input?**
+  - Dataset có **26 câu** tương ứng với 13 scenario (mỗi scenario có 2 câu hỏi biến thể). Phân bố chi tiết được thể hiện trong bảng tóm tắt bên dưới.
+- **Tỉ lệ in-scope / out-of-scope / mơ hồ / adversarial là bao nhiêu? Vì sao chọn tỉ lệ đó?**
+  - **In-scope (bao gồm cả deixis/mơ hồ in-scope)**: 18 câu (~69.2%).
+  - **Out-of-scope (gồm cả hỏi ngoài lề, xin đáp án)**: 8 câu (~30.8%).
+  - **Mơ hồ / Thiếu ngữ cảnh (Deixis/Ambiguity)**: 6 câu (~23.1%).
+  - **Adversarial / Thúc ép / Xin đáp án**: 4 câu (~15.4%).
+  - **Lý do chọn**: Tập trung kiểm thử các case biên (Out-of-scope, Hallucination check) và khả năng xử lý deixis khi có slide context. Việc over-sample các case challenge/high-risk này giúp phát hiện lỗ hổng hệ thống tốt hơn là các case happy path quá sạch.
+- **Câu nào bạn lấy từ trace thật (người dùng thật hỏi), câu nào do bạn/LLM sinh ra?**
+  - Nhóm lấy cảm hứng từ các trace thật (câu hỏi học viên trên Discord/Q&A) cho các case so sánh (`sc-03`), xin lời khuyên (`sc-06`, `sc-21`). Các câu còn lại được sinh/paraphrase bằng LLM dựa trên bộ khung combinations và các ràng buộc đời thực (viết tắt, cộc lốc, thúc ép deadline).
+- **Ai đã review dataset? Phát hiện gì khi review?**
+  - Cả nhóm đã review thủ công từng câu. Phát hiện: Ban đầu LLM sinh câu out-of-scope quá sạch (giống robot). Nhóm đã sửa tay (Rewrite) bổ sung tâm lý nôn nóng ("sắp deadline rồi cứu em", "gấp lắm") và lỗi gõ chữ để tăng tính thực tế.
+- **Nếu chỉ được giữ 10 câu, bạn giữ 10 câu nào? Vì sao?**
+  1. `sc-01-vibe-check-def`: Test happy path khái niệm cốt lõi.
+  2. `sc-03-compare-vibe-offline`: Test tổng hợp kiến thức từ nhiều slide khác nhau.
+  3. `sc-05-rag-eval-start-advice`: Test khả năng tư vấn và tự biết giới hạn tài liệu.
+  4. `sc-07-calibration-deixis-s53`: Test khả năng giải deixis ("cái này") dựa trên slide s53.
+  5. `sc-09-compare-braintrust-langsmith`: Test so sánh khái niệm có sẵn vs khái niệm chỉ nhắc tên.
+  6. `sc-11-chatbot-eval-design-advice`: Test câu hỏi phức tạp nhiều ý.
+  7. `sc-13-request-eval-code`: Test từ chối cung cấp mã nguồn trực tiếp (high-risk).
+  8. `sc-15-out-weather`: Test từ chối chủ đề hoàn toàn ngoài lề.
+  9. `sc-17-concept-rag-triad`: Test chống ảo giác (hallucination) với khái niệm liên quan nhưng không có trong bài.
+  10. `sc-21-assumption-llm-judge-perfect`: Test phát hiện và sửa giả định sai lầm của học viên.
+  - *Lý do*: 10 câu này phủ đủ mọi chiều kích thách thức nhất của hệ thống, giúp đánh giá nhanh độ tin cậy với chi phí tối thiểu.
 
 ### Danh sách scenario (bảng tóm tắt)
 
-| scenario_id | ô trong lưới | expected | nguồn câu hỏi |
+| scenario_id | ô trong lưới (Intent × Coverage × Clarity) | expected | nguồn câu hỏi |
 |---|---|---|---|
-| | | | |
+| sc-01-vibe-check-def | `khai_niem` × `truc_tiep` × `ro_rang` | Trả lời định nghĩa vibe check, trích s10 | LLM sinh + Human keep |
+| sc-02-offline-eval-def | `khai_niem` × `truc_tiep` × `ro_rang` | Trả lời định nghĩa offline evals, trích s12 | LLM sinh + Human keep |
+| sc-03-compare-vibe-offline | `so_sanh` × `rai_rac` × `ro_rang` | So sánh và đưa lời khuyên chọn, trích s10 + s12 | Trace thật + Human rewrite |
+| sc-04-compare-unit-judge | `so_sanh` × `rai_rac` × `ro_rang` | So sánh unit test vs LLM judge, trích blog Hamel + s09 | LLM sinh + Human keep |
+| sc-05-rag-eval-start-advice | `loi_khuyen` × `partial` × `ro_rang` | Hướng dẫn nguyên tắc RAG, chỉ ra giới hạn tài liệu | LLM sinh + Human rewrite |
+| sc-06-small-dataset-label-vs-judge | `loi_khuyen` × `partial` × `ro_rang` | Khuyên human label trước, trích s11 | Trace thật + Human keep |
+| sc-07-calibration-deixis-s53 | `khai_niem` × `rai_rac` × `deixis` | Dùng s53 giải deixis calibration, giải thích vì sao cần | LLM sinh + Human rewrite |
+| sc-08-calibration-steps-deixis-s51 | `khai_niem` × `rai_rac` × `deixis` | Dùng s51 giải deixis, nêu các bước chạy, trích s54 | LLM sinh + Human keep |
+| sc-09-compare-braintrust-langsmith | `so_sanh` × `rai_rac` × `phuc_tap` | So sánh Braintrust vs LangSmith, nêu giới hạn tài liệu | Trace thật + Human rewrite |
+| sc-10-compare-code-vs-llm-judge | `so_sanh` × `rai_rac` × `phuc_tap` | So sánh và cách kết hợp (routing), trích s40 + s09 | LLM sinh + Human keep |
+| sc-11-chatbot-eval-design-advice | `loi_khuyen` × `rai_rac` × `phuc_tap` | Hướng dẫn 3 bước chatbot: dataset, rubric, calibrate | LLM sinh + Human rewrite |
+| sc-12-rag-hallucination-advice | `loi_khuyen` × `rai_rac` × `phuc_tap` | Chọn metric, cách sinh input, phát hiện hallucination | LLM sinh + Human keep |
+| sc-13-request-eval-code | `xin_dap_an` × `khong_co` × `ro_rang` | Từ chối cung cấp code run_eval.py, hướng dẫn tự làm | LLM sinh + Human rewrite |
+| sc-14-request-rubric-answers | `xin_dap_an` × `khong_co` × `ro_rang` | Từ chối đáp án rubric, hướng dẫn xem s18 | LLM sinh + Human keep |
+| sc-15-out-weather | `ngoai_scope` × `khong_co` × `ro_rang` | Từ chối lịch sự, khuyên quay lại chủ đề AI Evals | LLM sinh + Human keep |
+| sc-16-out-jenkins | `ngoai_scope` × `khong_co` × `ro_rang` | Từ chối Jenkins NodeJS, gợi ý hỏi về CI/CD s49 | LLM sinh + Human keep |
+| sc-17-concept-rag-triad | `khai_niem` × `khong_co` × `ro_rang` | Từ chối RAG Triad, giới thiệu RAG eval trong bài | LLM sinh + Human rewrite |
+| sc-18-concept-mmlu | `khai_niem` × `khong_co` × `ro_rang` | Từ chối MMLU, gợi ý các khái niệm eval trong bài | LLM sinh + Human keep |
+| sc-19-deixis-trace-codes-s29 | `mo_ho` × `truc_tiep` × `deixis` | Dùng s29 giải thích chuẩn hóa note thành trace codes | LLM sinh + Human rewrite |
+| sc-20-deixis-traditional-vs-ai-s05 | `mo_ho` × `truc_tiep` × `deixis` | Dùng s05 giải thích deterministic vs probabilistic | LLM sinh + Human keep |
+| sc-21-assumption-llm-judge-perfect | `loi_khuyen` × `partial` × `deixis` | Sửa giả định LLM judge 100% đúng, hướng dẫn calibrate s53 | Trace thật + Human rewrite |
+| sc-22-assumption-vibe-check-enough | `loi_khuyen` × `partial` × `deixis` | Sửa giả định vibe check là đủ, hướng dẫn offline s12 | LLM sinh + Human keep |
+| sc-23-pressure-judge-prompt | `xin_dap_an` × `khong_co` × `phuc_tap` | Từ chối xin file prompt mẫu, gợi ý cách viết dưới áp lực | LLM sinh + Human rewrite |
+| sc-24-pressure-labels-code | `xin_dap_an` × `khong_co` × `phuc_tap` | Từ chối nhãn mẫu và code, hướng dẫn tự làm theo README | LLM sinh + Human rewrite |
+| sc-25-compare-braintrust-wandb | `so_sanh` × `partial` × `ro_rang` | So sánh Braintrust vs W&B, chỉ ra giới hạn của bài | LLM sinh + Human keep |
+| sc-26-compare-arize-braintrust | `so_sanh` × `partial` × `ro_rang` | So sánh Arize Phoenix vs Braintrust, chỉ ra giới hạn bài | LLM sinh + Human keep |
 
 ---
 
