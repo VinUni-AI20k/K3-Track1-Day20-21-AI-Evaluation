@@ -4,7 +4,6 @@
 bằng code — nhanh, rẻ, khách quan, chạy lại bao nhiêu lần cũng được.
 
 Chạy:  python3 eval/code_checks.py            # in bảng pass/fail từng check từng row
-Mở rộng: thêm hàm check_* mới của riêng nhóm (xem 3 hàm mẫu dưới).
 """
 import json
 import os
@@ -18,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tutor"))
 import tutor  # dùng lại load_corpus
 
 EXPECTED_FIELDS = {"scope", "answer", "sources", "followup_questions"}
+VALID_SCOPES = {"in_scope", "out_of_scope"}
 
 
 def check_schema(rec):
@@ -28,6 +28,8 @@ def check_schema(rec):
     missing = EXPECTED_FIELDS - set(out)
     if missing:
         return False, "thiếu field: " + ", ".join(sorted(missing))
+    if out.get("scope") not in VALID_SCOPES:
+        return False, f"scope không hợp lệ: {out.get('scope')!r} (kỳ vọng in_scope hoặc out_of_scope)"
     return True, None
 
 
@@ -65,11 +67,83 @@ def check_quote_verbatim(rec, section_tokens):
     return True, None
 
 
-CHECKS = [  # thêm check của nhóm vào đây
+def check_scope_sources_consistency(rec):
+    """Kiểm tra tính nhất quán giữa scope và danh sách sources:
+    - out_of_scope: sources phải rỗng (không được bịa trích dẫn).
+    - in_scope: sources phải có >= 1 trích dẫn hợp lệ."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    scope = out.get("scope")
+    sources = out.get("sources", [])
+    if not isinstance(sources, list):
+        return False, "sources phải là một list"
+    if scope == "out_of_scope":
+        if len(sources) > 0:
+            return False, f"câu out_of_scope nhưng lại trích dẫn {len(sources)} sources"
+    elif scope == "in_scope":
+        if len(sources) == 0:
+            return False, "câu in_scope nhưng sources bị rỗng"
+    return True, None
+
+
+def check_followup_quality(rec):
+    """Kiểm tra cấu trúc câu hỏi gợi ý tiếp theo (followup_questions):
+    - Phải là list chứa đúng 3 câu hỏi (cả in_scope và out_of_scope).
+    - Mỗi câu hỏi phải là một chuỗi ký tự không rỗng."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    qs = out.get("followup_questions")
+    if not isinstance(qs, list):
+        return False, "followup_questions phải là một list"
+    if len(qs) != 3:
+        return False, f"followup_questions phải có đúng 3 câu hỏi (hiện có {len(qs)})"
+    for q in qs:
+        if not isinstance(q, str) or not q.strip():
+            return False, "followup_questions chứa phần tử rỗng hoặc không phải string"
+    return True, None
+
+
+def check_sources_no_duplicates(rec):
+    """Đảm bảo không có nguồn trích dẫn trùng lặp (duplicate doc_id + section_id)."""
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    sources = out.get("sources") or []
+    seen = set()
+    for s in sources:
+        key = (s.get("doc_id"), s.get("section_id"))
+        if key in seen:
+            return False, f"trùng lặp trích dẫn: {key[0]}#{key[1]}"
+        seen.add(key)
+    return True, None
+
+
+CHECKS = [
     ("schema_valid", check_schema),
     ("citation_exists", check_citation_exists),
     ("quote_verbatim", check_quote_verbatim),
+    ("scope_sources_consistency", check_scope_sources_consistency),
+    ("followup_quality", check_followup_quality),
+    ("sources_no_duplicates", check_sources_no_duplicates),
 ]
+
+
+def run_checks_on_record(rec, valid_ids, section_tokens):
+    """Chạy toàn bộ code checks trên 1 record, trả về dict kết quả {check_name: (bool|None, reason)}."""
+    results = {}
+    for name, fn in CHECKS:
+        if fn in (check_schema, check_scope_sources_consistency, check_followup_quality, check_sources_no_duplicates):
+            ok, reason = fn(rec)
+        elif fn is check_citation_exists:
+            ok, reason = fn(rec, valid_ids)
+        elif fn is check_quote_verbatim:
+            ok, reason = fn(rec, section_tokens)
+        else:
+            ok, reason = fn(rec)
+        results[name] = (ok, reason)
+    return results
 
 
 def main(path="results.jsonl"):
@@ -84,14 +158,10 @@ def main(path="results.jsonl"):
     totals = {name: [0, 0] for name, _ in CHECKS}  # [pass, fail] (skip không đếm)
     for rec in rows:
         sid = rec.get("scenario_id", "?")
+        res = run_checks_on_record(rec, valid_ids, section_tokens)
         line = [sid]
-        for name, fn in CHECKS:
-            if fn is check_schema:
-                ok, reason = fn(rec)
-            elif fn is check_citation_exists:
-                ok, reason = fn(rec, valid_ids)
-            else:
-                ok, reason = fn(rec, section_tokens)
+        for name, _ in CHECKS:
+            ok, reason = res[name]
             if ok is None:
                 line.append(f"{name}: skip")
                 continue
