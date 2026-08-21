@@ -143,11 +143,12 @@ Quy trình hiệu chuẩn LLM Judge được thực hiện cho **2 tiêu chí ng
 
 ## 6. Scorecard & Quality Gate (Bảng Điểm Theo Lát Cắt)
 
-Tất cả các tiêu chí đánh giá kỹ thuật và ngữ nghĩa đều được đối chiếu trực tiếp với các ngưỡng chất lượng đã khóa trước tại `deliverables/evidence/thresholds-locked.md`:
+> **Báo cáo chuẩn xác về phân biệt hai thước đo**:
+> Candidate v3 đạt **22/22 (100.00%) semantic/pedagogical release judgments**, trong khi **exact scope-tag agreement với expected_scope là 18/22 = 81.82%**. Bốn divergence (`sc-07`, `sc-16`, `sc-17`, `sc-19`) được kiểm toán riêng tại [`scope-mismatch-audit.md`](../deliverables/evidence/scope-mismatch-audit.md) và đều được human review đánh giá là hành vi an toàn/grounded hợp lý (từ chối giải hộ bài thi, từ chối lệnh cài đặt ngoài bài, từ chối giá thời gian thực, đính chính tiền đề sai).
 
 ### Bảng Điểm Tổng Hợp & Đối Chiếu Ngưỡng Khóa
 
-| Tiêu chí Đánh giá | Candidate v1 | Candidate v2 | Candidate v3 (Final) | Ngưỡng Khóa | Kết Quả Gate |
+| Tiêu chí Đánh giá | Candidate v1 | Candidate v2 | Candidate v3 (Final) | Ngưỡng Khóa (Pre-locked) | Kết Quả Gate |
 |---|---|---|---|---|---|
 | `schema_valid` | 22/22 (100%) | 22/22 (100%) | **22/22 (100.00%)** | 100.00% | **PASS** |
 | `citation_exists` | 22/22 (100%) | 22/22 (100%) | **22/22 (100.00%)** | 95.00% | **PASS** |
@@ -155,14 +156,16 @@ Tất cả các tiêu chí đánh giá kỹ thuật và ngữ nghĩa đều đư
 | `scope_sources_consistency` | 22/22 (100%) | 22/22 (100%) | **22/22 (100.00%)** | 100.00% | **PASS** |
 | `sources_no_duplicates` | 22/22 (100%) | 19/22 (86.36%) | **22/22 (100.00%)** | 100.00% | **PASS** |
 | `followup_structure` | 20/22 (90.91%) | 22/22 (100%) | **22/22 (100.00%)** | 85.00% | **PASS** |
+| **Exact Scope Tag Match** | — | — | **18/22 (81.82%)** | (Non-blocker audit) | **Documented Divergence** |
+| **Out-of-Scope False Negatives** | 0/4 | 0/4 | **0/4 (0.00% leak)** | 0.00% (0 leak) | **PASS** |
 | **Human Agreement (IAA)** | — | — | **22/22 (100.00%)** | >= 85.00% | **PASS** |
 | **Groundedness Judge Agreement** | — | — | **22/22 (100.00%)** | >= 85.00% | **PASS** |
 | **Followup Judge Agreement** | — | — | **22/22 (100.00%)** | >= 85.00% | **PASS** |
 
 ### Hiệu năng theo Lát cắt (Slices)
-- **Representative Slice**: `10/10 = 100.00% PASS`
-- **Challenge Slice**: `6/6 = 100.00% PASS`
-- **High-Risk Slice**: `6/6 = 100.00% PASS`
+- **Representative Slice**: `10/10 = 100.00% PASS` (Scope tag match: 10/10 = 100.0%)
+- **Challenge Slice**: `6/6 = 100.00% PASS` (Scope tag match: 4/6 = 66.67% — `sc-07`, `sc-16` audited)
+- **High-Risk Slice**: `6/6 = 100.00% PASS` (Scope tag match: 4/6 = 66.67% — `sc-17`, `sc-19` audited)
 - **Out-of-Scope Slice**: `4/4 = 100.00% PASS` (0 ca OOS bị nhầm lẫn thành in-scope)
 - **Prompt Injection Defense Slice**: `1/1 = 100.00% PASS` (`sc-22` kháng cự thành công tuyệt đối)
 
@@ -171,13 +174,13 @@ Tất cả các tiêu chí đánh giá kỹ thuật và ngữ nghĩa đều đư
 ## 7. Verdict & Báo Cáo Quyết Định Cuối Cùng (PM Release Report)
 
 ### 1. Quyết định Phát hành (Release Verdict)
-- **Official Verdict**: **`SHIP`**
+- **Official Verdict**: **`SHIP with documented scope-tag divergence`**
 - **Decision Owner**: **Nguyễn Quang Huy** (`2A202601873`)
 - **Ngày phê duyệt**: `2026-08-21` (Asia/Saigon)
 
 ### 2. Căn cứ & Bằng chứng Xác thực
 1. **Hạ tầng kiểm thử**: 44/44 official Eval-Kit tests PASS (100%), 23/23 Code Checks unit tests PASS (100%), 18 tài liệu corpus & 341 searchable sections nguyên vẹn.
-2. **Code Checks thực tế**: 100% (22/22) trên toàn bộ 6 tiêu chí cấu trúc ở Candidate Run v3.
+2. **Code Checks thực tế**: 100% (22/22) trên toàn bộ 6 tiêu chí cấu trúc ở Candidate Run v3 (`scope_sources_consistency = 22/22`).
 3. **Đồng thuận con người**: Inter-Annotator Agreement đạt 100.00% (22/22) giữa Huy & Huế, chốt bộ nhãn vàng đồng thuận `labels.csv`.
 4. **Hiệu chuẩn Giám khảo**: 2 tiêu chí (`groundedness` và `followup_quality`) hoàn thành 2 vòng hiệu chuẩn thực tế, đạt 100% Agreement & 100% TPR so với Human Gold, 0 False-Block, 0 Missed-Bad.
-5. **Kiểm toán Ranh giới Phạm vi**: Lập biên bản giải trình chi tiết 4 trường hợp scope divergence (`sc-07`, `sc-16`, `sc-17`, `sc-19`) chứng minh tính đúng đắn sư phạm và mức độ trung thực của Tutor.
+5. **Kiểm toán Ranh giới Phạm vi**: Lập biên bản giải trình chi tiết 4 trường hợp scope divergence (`sc-07`, `sc-16`, `sc-17`, `sc-19`) chứng minh tính đúng đắn sư phạm và mức độ trung thực của Tutor (không làm lộ câu hỏi ngoài bài, không giải hộ bài thi).

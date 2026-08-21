@@ -28,8 +28,8 @@ Hệ thống Đánh giá Toàn diện (End-to-End AI Evaluation Harness) cho **V
    - Quyết định và ký duyệt các ngưỡng chặn phát hành tại [thresholds-locked.md](deliverables/evidence/thresholds-locked.md) (100% schema, 95% citation, 90% quote, >=85% IAA, >=85% Judge agreement) trước khi chạy Candidate v3.
 4. **Kiểm toán Kỹ thuật & Bắt lỗi Nhân bản Giám khảo**:
    - Trực tiếp phát hiện lỗi tự động hóa nhân bản file judge của AI, ra lệnh cách ly vào `archive/` và yêu cầu chạy lại 2 vòng API thực sự độc lập cho 2 tiêu chí (`groundedness` & `followup_quality`).
-5. **Ký duyệt Quyết định Phát hành Chính thức (Phase 6)**:
-   - Đánh giá toàn diện 14 lát cắt dữ liệu và phê duyệt quyết định **`SHIP`** cho VLearn AI Tutor trong [REPORT.md](deliverables/REPORT.md).
+5. **Kiểm toán Ranh giới Phạm vi & Ký duyệt Quyết định Phát hành (Phase 6)**:
+   - Phân biệt rõ hai thước đo: **Semantic/Pedagogical Release Pass = 22/22 (100.00%)** và **Exact Scope Tag Match = 18/22 (81.82%)** kèm giải trình 4 ca từ chối an toàn tại [scope-mismatch-audit.md](deliverables/evidence/scope-mismatch-audit.md). Ký duyệt quyết định **`SHIP with documented scope-tag divergence`** cho VLearn AI Tutor trong [REPORT.md](deliverables/REPORT.md).
 
 ---
 
@@ -48,7 +48,7 @@ Phase 4: Multi-Criterion Calibration ► Code Checks (22/22 PASS), 2 Criteria Ju
        │
 Phase 5: Pre-locked Thresholds & Slices ─► Thresholds locked BEFORE candidate, 14-Slice Breakdown Scorecard
        │
-Phase 6: Release Verdict & Report ──► PM Verdict (SHIP), 7-Section REPORT.md, Root ai-support-log.md
+Phase 6: Release Verdict & Report ──► PM Verdict (SHIP with documented divergence), 7-Section REPORT.md, Root ai-support-log.md
 ```
 
 ---
@@ -57,7 +57,7 @@ Phase 6: Release Verdict & Report ──► PM Verdict (SHIP), 7-Section REPORT.
 
 | Thành phần | Đường dẫn Artifact | Mô tả | Trạng thái kỹ thuật |
 |---|---|---|---|
-| **Báo cáo chính A→Z** | [`deliverables/REPORT.md`](deliverables/REPORT.md) | Báo cáo hoàn chỉnh 7 mục từ Input Grid đến Verdict | **Complete & Structured (SHIP)** |
+| **Báo cáo chính A→Z** | [`deliverables/REPORT.md`](deliverables/REPORT.md) | Báo cáo hoàn chỉnh 7 mục từ Input Grid đến Verdict | **Complete & Structured (SHIP with divergence)** |
 | **Nhật ký AI cá nhân** | [`ai-support-log.md`](ai-support-log.md) | Minh bạch phạm vi AI hỗ trợ và quyết định của Huy | **Audited & Personal** |
 | **Mục lục minh chứng** | [`deliverables/evidence/INDEX.md`](deliverables/evidence/INDEX.md) | Bảng tra cứu tất cả các Gate và bằng chứng thực tế | **Complete & Traceable** |
 | **Kiểm toán Corpus** | [`deliverables/evidence/corpus-audit.md`](deliverables/evidence/corpus-audit.md) | Kiểm kê 18 tài liệu và 341 sections corpus | **PASS (18 docs, 341 sections)** |
@@ -75,18 +75,18 @@ Phase 6: Release Verdict & Report ──► PM Verdict (SHIP), 7-Section REPORT.
 | **Judge Manifest (4 Runs)**| [`deliverables/evidence/JUDGE-CALIBRATION-MANIFEST.md`](deliverables/evidence/JUDGE-CALIBRATION-MANIFEST.md) | Bằng chứng 2 tiêu chí × 2 vòng chạy API riêng biệt | **AUDITED & PROVEN (4 Runs)** |
 | **Groundedness Calib** | [`deliverables/evidence/calibration-groundedness-v2.md`](deliverables/evidence/calibration-groundedness-v2.md) | Hiệu chuẩn 2 vòng tiêu chí Groundedness | **100% Agreement & 100% TPR** |
 | **Followup Calib** | [`deliverables/evidence/calibration-followup-v2.md`](deliverables/evidence/calibration-followup-v2.md) | Hiệu chuẩn 2 vòng tiêu chí Followup Quality | **100% Agreement & 100% TPR** |
-| **Scope Mismatch Audit** | [`deliverables/evidence/scope-mismatch-audit.md`](deliverables/evidence/scope-mismatch-audit.md) | Phân tích 4 ca lệch nhãn phạm vi sc-07, 16, 17, 19 | **AUDITED & EXPLAINED** |
-| **Slice Scorecard** | [`deliverables/evidence/scorecard-final-real.md`](deliverables/evidence/scorecard-final-real.md) | Bảng điểm chi tiết theo 14 lát cắt dữ liệu | **100.00% across all slices** |
+| **Scope Mismatch Audit** | [`deliverables/evidence/scope-mismatch-audit.md`](deliverables/evidence/scope-mismatch-audit.md) | Phân tích 4 ca lệch nhãn phạm vi sc-07, 16, 17, 19 | **AUDITED & EXPLAINED (18/22 match)** |
+| **Slice Scorecard** | [`deliverables/evidence/scorecard-final-real.md`](deliverables/evidence/scorecard-final-real.md) | Bảng điểm chi tiết theo 14 lát cắt dữ liệu | **100.00% semantic pass** |
 
 ---
 
 ## 🎯 QUYẾT ĐỊNH PHÁT HÀNH (RELEASE VERDICT) & LÝ DO
 
-- **Official Verdict**: **`SHIP`**
+- **Official Verdict**: **`SHIP with documented scope-tag divergence`**
 - **Decision Owner**: **Nguyễn Quang Huy** (`2A202601873`)
 - **Lý do quyết định**:
-  1. **Chất lượng Kỹ thuật**: 100% (22/22) kịch bản vượt qua 6 tiêu chuẩn Code Checks tự động (JSON schema hợp lệ, trích dẫn section tồn tại thực tế, quote nguyên văn chính xác, không trùng lặp nguồn, có đủ 3 câu hỏi gợi ý chất lượng).
-  2. **An toàn Sư phạm & Ngữ nghĩa**: Trợ giảng nhận diện chuẩn xác các ranh giới ngoài luồng (OOS), từ chối an toàn các câu hỏi xin đáp án làm hộ bài thi (`sc-06`, `sc-07`), đính chính xuất sắc các bẫy tiền đề sai (`sc-10`, `sc-13`, `sc-14`, `sc-15`, `sc-19`), và kháng cự tuyệt đối tấn công Prompt Injection (`sc-22`).
+  1. **Chất lượng Ngữ nghĩa & Sư phạm Đạt Chuẩn**: Candidate v3 đạt **22/22 (100.00%)** trên tất cả các đánh giá sư phạm, không ảo giác, bám sát học liệu corpus, không đồng tình với tiền đề sai (`sc-10`, `sc-13`, `sc-14`, `sc-15`, `sc-19`), và kháng cự tuyệt đối tấn công Prompt Injection (`sc-22`).
+  2. **Kiểm toán Ranh giới Phân loại Phạm vi**: Exact scope-tag agreement đạt **18/22 = 81.82%**. Bốn trường hợp phân kỳ tag phạm vi (`sc-07`, `sc-16`, `sc-17`, `sc-19`) đều xuất phát từ hành vi từ chối an toàn/grounded hợp lý (từ chối giải hộ bài thi, từ chối lệnh cài đặt ngoài bài, từ chối giá thời gian thực). Không có bất kỳ ca Out-of-Scope thực tế nào bị rò rỉ (`0/4 leaks = 0.00%`).
   3. **Hiệu chuẩn Giám khảo Vững chắc**: Đã hiệu chuẩn thành công 2 tiêu chí ngữ nghĩa độc lập (`groundedness` và `followup_quality`) qua 2 vòng chạy API thật với prompt phân tách XML, đạt 100% độ đồng thuận với nhãn vàng con người và 0 ca False-Block.
 
 ---
