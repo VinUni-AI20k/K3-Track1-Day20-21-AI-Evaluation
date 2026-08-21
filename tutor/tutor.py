@@ -194,6 +194,11 @@ def chat(messages, model=None, temperature=0, max_tokens=800, tools=None):
                "temperature": temperature, "max_tokens": max_tokens}
     if "deepseek-v4" in model:  # bắt buộc với deepseek v4: tắt thinking, nếu không mất output
         payload["thinking"] = {"type": "disabled"}
+        # OpenRouter BỎ QUA cờ "thinking" của deepseek -> reasoning tokens vẫn sinh và
+        # ăn hết max_tokens (content=null, finish_reason=length). Cờ tương đương của
+        # OpenRouter là "reasoning". Gửi kèm để chạy qua openrouter/* cũng tắt được.
+        if model.startswith("openrouter/"):
+            payload["reasoning"] = {"enabled": False}
     # ép JSON: đo thực tế ~20% response không có cờ này bị vỡ JSON giữa chừng.
     # Khi có tools, chỉ ép JSON ở vòng trả lời cuối — một số model bỏ tool_calls
     # nếu response_format bật ngay từ vòng đầu. Anthropic (endpoint tương thích
