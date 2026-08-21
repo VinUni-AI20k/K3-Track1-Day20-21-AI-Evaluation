@@ -1,8 +1,8 @@
-﻿# REPORT — Eval Loop A→Z: VLearn AI Tutor
+# REPORT — Eval Loop A→Z: VLearn AI Tutor
 
 **Nhóm thực hiện**:
-- **Nguyễn Quang Huy** — Mã học viên: `2A202601873`
-- **Lăng Thị Phương Huế** — Mã học viên: `2A202601915`
+- **Nguyễn Quang Huy** — Mã học viên: `2A202601873` (Decision Owner)
+- **Lăng Thị Phương Huế** — Mã học viên: `2A202601915` (Collaborator & Annotator)
 
 Tài liệu báo cáo toàn diện chu trình đánh giá chất lượng sản phẩm AI Tutor (VLearn AI Tutor) dựa trên bằng chứng kỹ thuật, kiểm thử mã nguồn và dữ liệu kiểm toán độc lập.
 
@@ -15,7 +15,7 @@ Hệ thống AI Tutor phục vụ các nhóm đối tượng học viên với c
   1. *Học viên mới*: Cần nắm bắt khái niệm cốt lõi, giải thích định nghĩa rõ ràng.
   2. *Học viên đang thực hành bài Lab / Capstone*: Thường hỏi cách áp dụng, gặp lỗi hoặc tìm kiếm đáp án gợi ý.
   3. *Học viên ôn tập chuyên sâu*: Đặt câu hỏi so sánh giữa các phương pháp, chất vấn về các trường hợp biên hoặc giả định gây hiểu nhầm.
-- **Ý định (Intent)**:
+- **Ý định (Intent - D1)**:
   - `In-scope Concept`: Hỏi định nghĩa/khái niệm trong bài.
   - `Comparison`: So sánh, phân biệt ưu/nhược điểm giữa 2 phương pháp.
   - `Application`: Xin hướng dẫn áp dụng nguyên lý vào bài toán cụ thể.
@@ -39,47 +39,55 @@ Hệ thống AI Tutor phục vụ các nhóm đối tượng học viên với c
 
 ## 2. Dataset v1 (Bộ Đề Thi Thẩm Định)
 
-Dataset v1 được thiết kế với 15 tổ hợp kiểm thử có chủ đích (`C01`–`C15`), phân bổ khoa học nhằm kiểm tra trọn vẹn các ranh giới hành vi của Tutor:
-- **Quy mô & Tỉ lệ phân bổ**:
-  - `in_scope`: 11 scenarios (~73.3%)
-  - `out_of_scope`: 2 scenarios (C05, C06 — 13.3%)
-  - `unclear / ambiguous / underspecified`: 4 scenarios (C06, C07, C08, C15 — 26.7%)
-  - `high-risk / false premise / unsupported`: 4 scenarios (C10, C11, C13, C15 — 26.7%)
+Dataset v1 được thiết kế với 15 tổ hợp kiểm thử có chủ đích (`C01`–`C15`), phân rã thành **22 canonical scenarios** nhằm kiểm tra trọn vẹn các ranh giới hành vi của Tutor:
+- **Quy mô & Phân bổ Lát cắt**:
+  - `in_scope`: 18 scenarios (81.8%)
+  - `out_of_scope`: 4 scenarios (sc-08, sc-09, sc-20, sc-22 — 18.2%)
+  - `ambiguous / underspecified`: 4 scenarios (sc-09, sc-10, sc-11, sc-19 — 18.2%)
+  - `multi-intent`: 3 scenarios (sc-12, sc-18, sc-21 — 13.6%)
+  - `high-risk / false premise / unsupported / injection`: 9 scenarios (sc-13, sc-14, sc-15, sc-17, sc-19, sc-22...)
 - **Phân loại tập kiểm thử (Set Type)**:
-  - `representative`: 6 scenarios (40.0%) — các ca hỏi thông thường chuẩn mực.
-  - `challenge`: 5 scenarios (33.3%) — các ca mơ hồ, thiếu đại từ hoặc hỗ trợ một phần.
-  - `high-risk`: 4 scenarios (26.7%) — các ca gài bẫy tiền đề sai, bẫy nịnh bợ hoặc hỏi giá API ảo.
+  - `representative`: 10 scenarios (45.5%) — các ca hỏi thông thường chuẩn mực.
+  - `challenge`: 6 scenarios (27.3%) — các ca mơ hồ, thiếu đại từ hoặc hỗ trợ một phần.
+  - `high-risk`: 6 scenarios (27.3%) — các ca gài bẫy tiền đề sai, bẫy nịnh bợ, hỏi giá API ảo hoặc prompt injection.
 - **Top 10 Scenarios cốt lõi bắt buộc giữ lại**:
-  1. `C01`: Khái niệm chuẩn hóa Trace Codes (Representative).
-  2. `C02`: So sánh Code Check vs LLM Judge (Representative).
-  3. `C04`: Xử lý tình huống xin đáp án bài thi theo phương pháp Socratic (Challenge).
-  4. `C05`: Từ chối lịch sự câu hỏi thời tiết ngoài môn học (Out-of-scope).
-  5. `C07`: Xử lý thuật ngữ đa nghĩa "Matrix" (Ambiguous).
-  6. `C08`: Phục hồi ngữ cảnh từ Slide `s51` khi học viên hỏi thiếu đại từ (Underspecified).
-  7. `C09`: Phân rã câu hỏi đa ý định về True Positive Rate (Multi-intent).
-  8. `C10`: Đính chính tiền đề sai "LLM judge không cần calibrate" (High-risk).
-  9. `C11`: Đính chính hiểu lầm "Code check tốn kém hơn LLM judge" (High-risk).
-  10. `C13`: Thừa nhận dữ liệu giá API không có trong corpus, từ chối bịa giá (High-risk).
+  1. `sc-01-trace-codes-def`: Khái niệm chuẩn hóa Trace Codes (Representative).
+  2. `sc-03-compare-code-judge`: So sánh Code Check vs LLM Judge (Representative).
+  3. `sc-06-answer-seeking-capstone`: Xử lý tình huống xin đáp án bài thi theo phương pháp Socratic (Challenge).
+  4. `sc-08-oos-weather`: Từ chối lịch sự câu hỏi thời tiết ngoài môn học (Out-of-scope).
+  5. `sc-10-ambiguous-matrix`: Xử lý thuật ngữ đa nghĩa "Matrix" (Ambiguous).
+  6. `sc-11-underspecified-slide-context`: Phục hồi ngữ cảnh từ Slide `s51` khi học viên hỏi thiếu đại từ (Underspecified).
+  7. `sc-12-multi-intent-tpr`: Phân rã câu hỏi đa ý định về True Positive Rate (Multi-intent).
+  8. `sc-13-false-premise-judge-calibration`: Đính chính tiền đề sai "LLM judge không cần calibrate" (High-risk).
+  9. `sc-15-false-premise-code-checks-cost`: Đính chính hiểu lầm "Code check tốn kém hơn LLM judge" (High-risk).
+  10. `sc-17-unsupported-live-pricing`: Thừa nhận dữ liệu giá API không có trong corpus, từ chối bịa giá (High-risk).
 
-### Bảng tóm tắt Scenario
+### Bảng tóm tắt 22 Scenarios
 
-| scenario_id | Ô trong lưới | expected_scope | Nguồn tài liệu đối chiếu | Set Type |
+| scenario_id | Combination | expected_scope | Nguồn tài liệu đối chiếu | Set Type |
 |---|---|---|---|---|
-| `C01` | In-scope × 1-Source × Clear | `in_scope` | `slide-day19-20` (`s29`), `ai-evals-m04` (`lesson-1-what-is-a-trace`) | `representative` |
-| `C02` | Comparison × Multi-Source × Clear | `in_scope` | `ai-evals-m06` (`what-exactly-is-a-code-based-eval`), `ai-evals-m07` (`when-to-use-llm-as-judge`) | `representative` |
-| `C03` | Application × 1-Source × Clear | `in_scope` | `anthropic-demystifying-evals` (`design-the-eval-harness-and-graders`), `ai-evals-m07` (`lesson-1-principles-of-llm-judge-design`) | `representative` |
-| `C04` | Answer-seeking × 1-Source × Clear | `in_scope` | `slide-day19-20` (`s62`), `ai-evals-m01` (`lesson-1-the-ai-flywheel`) | `challenge` |
-| `C05` | Out-of-scope × Unsupported × Clear | `out_of_scope` | *(None - Out of Scope)* | `representative` |
-| `C06` | Out-of-scope × Unsupported × Ambiguous | `out_of_scope` | *(None - Out of Scope)* | `challenge` |
-| `C07` | In-scope × 1-Source × Ambiguous | `in_scope` | `slide-day19-20` (`s48`), `ai-evals-m09` (`the-confusion-matrix`) | `challenge` |
-| `C08` | In-scope × 1-Source × Underspecified | `in_scope` | `slide-day19-20` (`s51`) | `challenge` |
-| `C09` | In-scope × Multi-Source × Multi-intent | `in_scope` | `ai-evals-m09` (`why-calibration-is-the-whole-game`), `slide-day19-20` (`s52`) | `representative` |
-| `C10` | In-scope × 1-Source × False Premise | `in_scope` | `ai-evals-m09` (`why-calibration-is-the-whole-game`), `slide-day19-20` (`s51`) | `high-risk` |
-| `C11` | Comparison × Multi-Source × False Premise | `in_scope` | `ai-evals-m06` (`what-exactly-is-a-code-based-eval`), `ai-evals-m07` (`when-to-use-llm-as-judge`) | `high-risk` |
-| `C12` | In-scope × Partial Support × Clear | `in_scope` | `ai-evals-m05` (`lesson-1-when-and-how-to-write-automated-evals`) | `challenge` |
-| `C13` | In-scope × Unsupported × Clear | `in_scope` | *(None - External Pricing)* | `high-risk` |
-| `C14` | Application × Multi-Source × Multi-intent | `in_scope` | `slide-day19-20` (`s22`, `s23`), `ai-evals-m08` (`building-the-initial-dataset`) | `representative` |
-| `C15` | Application × 1-Source × False Premise | `in_scope` | `ai-evals-m09` (`step-1-collect-human-labels`), `slide-day19-20` (`s48`) | `high-risk` |
+| `sc-01-trace-codes-def` | C01 | `in_scope` | `slide-day19-20` (`s29`), `ai-evals-m04` (`lesson-1-what-is-a-trace`) | `representative` |
+| `sc-02-trace-codes-benefits` | C01 | `in_scope` | `slide-day19-20` (`s29`), `ai-evals-m04` (`lesson-1-what-is-a-trace`) | `representative` |
+| `sc-03-compare-code-judge` | C02 | `in_scope` | `ai-evals-m06` (`what-exactly-is-a-code-based-eval`), `ai-evals-m07` (`when-to-use-llm-as-judge`) | `representative` |
+| `sc-04-when-use-code-vs-judge` | C02 | `in_scope` | `ai-evals-m06` (`what-exactly-is-a-code-based-eval`), `ai-evals-m07` (`when-to-use-llm-as-judge`) | `representative` |
+| `sc-05-rubric-design-app` | C03 | `in_scope` | `anthropic-demystifying-evals` (`design-the-eval-harness-and-graders`), `ai-evals-m07` | `representative` |
+| `sc-06-answer-seeking-capstone` | C04 | `in_scope` | `slide-day19-20` (`s62`), `ai-evals-m01` (`lesson-1-the-ai-flywheel`) | `challenge` |
+| `sc-07-answer-seeking-code-write` | C04 | `in_scope` | `slide-day19-20` (`s62`), `ai-evals-m01` | `challenge` |
+| `sc-08-oos-weather` | C05 | `out_of_scope` | *(None - Out of Scope)* | `representative` |
+| `sc-09-oos-travel-ambiguous` | C06 | `out_of_scope` | *(None - Out of Scope)* | `challenge` |
+| `sc-10-ambiguous-matrix` | C07 | `in_scope` | `slide-day19-20` (`s48`), `ai-evals-m09` (`the-confusion-matrix`) | `challenge` |
+| `sc-11-underspecified-slide-context` | C08 | `in_scope` | `slide-day19-20` (`s51`) | `challenge` |
+| `sc-12-multi-intent-tpr` | C09 | `in_scope` | `ai-evals-m09` (`why-calibration-is-the-whole-game`), `slide-day19-20` (`s52`) | `representative` |
+| `sc-13-false-premise-judge-calibration` | C10 | `in_scope` | `ai-evals-m09` (`why-calibration-is-the-whole-game`), `slide-day19-20` (`s51`) | `high-risk` |
+| `sc-14-false-premise-high-pass-rate` | C10 | `in_scope` | `ai-evals-m09` (`why-calibration-is-the-whole-game`) | `high-risk` |
+| `sc-15-false-premise-code-checks-cost` | C11 | `in_scope` | `ai-evals-m06` (`what-exactly-is-a-code-based-eval`), `ai-evals-m07` | `high-risk` |
+| `sc-16-partial-support-promptfoo` | C12 | `in_scope` | `ai-evals-m05` (`lesson-1-when-and-how-to-write-automated-evals`) | `challenge` |
+| `sc-17-unsupported-live-pricing` | C13 | `in_scope` | *(None - External Pricing)* | `high-risk` |
+| `sc-18-app-input-grid-design` | C14 | `in_scope` | `slide-day19-20` (`s22`, `s23`), `ai-evals-m08` (`building-the-initial-dataset`) | `representative` |
+| `sc-19-false-premise-single-annotator` | C15 | `in_scope` | `ai-evals-m09` (`step-1-collect-human-labels`), `slide-day19-20` (`s48`) | `high-risk` |
+| `sc-20-oos-cooking-recipe` | C05 | `out_of_scope` | *(None - Out of Scope)* | `representative` |
+| `sc-21-multi-intent-judge-design` | C03 | `in_scope` | `ai-evals-m07` (`lesson-1-principles-of-llm-judge-design`) | `representative` |
+| `sc-22-high-risk-injection-defense` | C05 | `out_of_scope` | *(None - Prompt Injection Defense)* | `high-risk` |
 
 ---
 
@@ -118,7 +126,7 @@ Nguyên tắc tối thượng: **Cái gì kiểm được bằng code thì bắt
 | `academic_integrity_boundary`| — | Supporting | **Primary** | Xử lý tình huống xin đáp án; duy trì tính gợi mở Socratic. |
 
 - **Cấu hình LLM Judge**:
-  - *Model Judge*: `openai/gpt-4o-mini` (độc lập với Tutor model `deepseek-v4-flash` để tránh bias tự chấm chéo).
+  - *Model Judge*: `openai/gpt-4o-mini` (độc lập với Tutor model để tránh bias tự chấm chéo).
   - *Temperature*: `0.0` (đảm bảo tính nhất quán và lặp lại tối đa).
   - *Prompt*: Trang bị chỉ thị bảo vệ chống Prompt Injection tại `eval/judge_prompt.md`.
 
@@ -126,7 +134,7 @@ Nguyên tắc tối thượng: **Cái gì kiểm được bằng code thì bắt
 
 ## 5. Calibration Report (Báo Cáo Hiệu Chuẩn LLM Judge)
 
-> **Trạng thái thực tế**: `PENDING REAL EXECUTION` (Chờ hoàn thành Human Baseline ở Phase 2 để lấy gold labels đối chiếu thực tế).
+> **Trạng thái thực tế**: `ENGINEERED / CALIBRATION PENDING` (Harness và bộ test unit 15/15 checks đã hoàn tất; chờ chạy live model evaluation để lấy gold labels đối chiếu thực tế).
 
 ### Quy trình Hiệu chuẩn Chuẩn bị (Harness Ready)
 Hệ thống `eval/judge.py` đã được nâng cấp hoàn chỉnh để tính toán:
@@ -140,7 +148,7 @@ Hệ thống `eval/judge.py` đã được nâng cấp hoàn chỉnh để tính
 
 ## 6. Scorecard & Quality Gate (Bảng Điểm Theo Lát Cắt)
 
-> **Trạng thái thực tế**: `NOT YET EXECUTED` (Các ngưỡng kỹ thuật đã được đóng dấu khóa tại `deliverables/evidence/thresholds-locked.md`; bảng điểm sẽ được tính toán trực tiếp từ kết quả candidate run).
+> **Trạng thái thực tế**: `THRESHOLDS LOCKED / FINAL SCORECARD PENDING` (Các ngưỡng kỹ thuật đã được đóng dấu khóa tại `deliverables/evidence/thresholds-locked.md`; bảng điểm sẽ được tính toán trực tiếp từ kết quả candidate run).
 
 ### Bảng Ngưỡng Khóa Trước Run (Locked Thresholds)
 
@@ -158,15 +166,15 @@ Hệ thống `eval/judge.py` đã được nâng cấp hoàn chỉnh để tính
 
 ## 7. Verdict & Báo Cáo Quyết Định Cuối Cùng (PM Release Report)
 
-> **Trạng thái thực tế**: `PENDING HUMAN APPROVAL` (Báo cáo tổng kết và quyết định phát hành sẽ được con người phê duyệt chính thức sau khi hoàn thành toàn bộ các vòng chấm độc lập và scorecard thực tế).
+> **Trạng thái thực tế**: `REPORT DRAFTED / FINAL VERDICT PENDING` (Quyết định phát hành chính thức `SHIP`, `SHIP WITH CONDITIONS`, hoặc `HOLD` sẽ được ban hành sau khi có kết quả scorecard thực tế từ live candidate run).
 
 ### 1. Dataset & Độ Phủ Dự Kiến
-15 scenarios có chủ đích, phủ 4 dimensions và 15 values.
+22 scenarios có chủ đích, phủ 4 dimensions, 15 values, 15 combinations C01–C15.
 
 ### 2. Quá Trình Đồng Thuận Con Người
-Sẽ được ghi nhận trực tiếp từ kết quả chạy `python eval/agreement.py labels-huy.csv labels-hue.csv` ở Phase 2.
+Sẽ được ghi nhận trực tiếp từ kết quả chạy `python eval/agreement.py labels-huy.csv labels-hue.csv` ở Phase 2 sau khi hai thành viên gán nhãn độc lập.
 
 ### 3. Phân Luồng và Giám sát Triển Khai
-- 6 tiêu chí cấu trúc giao cho **Code Checks**.
+- 6 tiêu chí cấu trúc giao cho **Code Checks** (15 unit tests 100% pass).
 - Tiêu chí bám nguồn giao cho **Calibrated LLM Judge** kèm kiểm toán ngẫu nhiên 10%/tuần.
 - Quyết định release chính thức do Nhóm QA/PM phê duyệt bằng biên bản thực tế.

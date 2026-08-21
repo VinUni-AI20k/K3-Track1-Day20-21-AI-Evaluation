@@ -2,7 +2,7 @@
 
 Bảng đối chiếu toàn bộ các Gate, yêu cầu kỹ thuật, file artifact, lệnh kiểm thử và trạng thái thực tế.
 
-| Gate | Yêu cầu kiểm thử | Artifact minh chứng | Lệnh kiểm tra / Tái hiện | Trạng thái hiện tại |
+| Gate | Yêu cầu kiểm thử | Artifact minh chứng | Lệnh kiểm tra / Tái hiện | Trạng thái thực tế |
 |---|---|---|---|---|
 | **Phase 0** | Tích hợp Eval-Kit an toàn | `tests/test_eval_kit.py`, `deliverables/evidence/baseline-validation.md` | `$env:PYTHONUTF8='1'; python tests\test_eval_kit.py` | **PASS (44/44 tests)** |
 | **Phase 0** | Kiểm kê Corpus 18 tài liệu | `tutor/corpus/manifest.json`, `deliverables/evidence/corpus-audit.md` | `python tests\test_eval_kit.py` | **PASS (18 docs, 341 sections)** |
@@ -10,14 +10,14 @@ Bảng đối chiếu toàn bộ các Gate, yêu cầu kỹ thuật, file artifa
 | **Gate 1** | Phê duyệt Values V01-V15 | `evals/phase1/human_decision_packet.md`, `deliverables/evidence/coverage-matrix.md` | Đối chiếu ma trận coverage | **PASS (HUMAN APPROVED & LOCKED)** |
 | **Gate 1** | Phê duyệt Combinations C01-C15 | `deliverables/evidence/combinations-candidate-pool.md`, `deliverables/evidence/HUMAN-CHECKPOINT-B-APPROVED.md` | Đối chiếu mapping corpus (341 sections) | **PASS (HUMAN APPROVED & LOCKED)** |
 | **Gate 1** | Canonical Dataset v1 | `deliverables/evidence/dataset-v1.jsonl`, `dataset.jsonl` | `python evals\validate_dataset.py deliverables\evidence\dataset-v1.jsonl` | **PASS (22 rows frozen & validated)** |
-| **Gate 2** | Chạy Tutor thực tế | `deliverables/evidence/results-v1.jsonl` | `python eval\run_eval.py` | **READY (Awaiting active API key)** |
-| **Gate 2** | Gán nhãn độc lập 2 thành viên | `deliverables/evidence/labels-huy.csv`, `deliverables/evidence/labels-hue.csv` | Kiểm tra file nhãn độc lập | **READY (Templates created)** |
-| **Gate 2** | Đo Agreement trước consensus | `deliverables/evidence/agreement-v1.md` | `python eval\agreement.py labels-huy.csv labels-hue.csv` | **READY (Harness configured)** |
+| **Gate 2** | Chạy Tutor thực tế | `deliverables/evidence/results-v1.jsonl` | `python eval\run_eval.py` | **BLOCKED / READY FOR LIVE EXECUTION (Awaiting active API key)** |
+| **Gate 2** | Gán nhãn độc lập 2 thành viên | `deliverables/evidence/labels-huy.csv`, `deliverables/evidence/labels-hue.csv` | Kiểm tra file nhãn độc lập | **READY FOR HUMAN ANNOTATION** |
+| **Gate 2** | Đo Agreement trước consensus | `deliverables/evidence/agreement-v1.md` | `python eval\agreement.py labels-huy.csv labels-hue.csv` | **HARNESS READY (Pending human labels)** |
 | **Gate 3** | Rubric V1 quan sát được | `deliverables/REPORT.md` (Mục 3) | Đối chiếu bảng rubric | **PASS (6 criteria specified & observable)** |
 | **Gate 3** | Ma trận Routing phân luồng | `deliverables/evidence/routing-table.md` | Đối chiếu bảng routing | **PASS (Code vs Judge vs Human mapped)** |
 | **Gate 4** | Bộ Code Checks nâng cao | `eval/code_checks.py`, `tests/test_code_checks.py` | `python tests\test_code_checks.py` | **PASS (15/15 unit tests)** |
-| **Gate 4** | Calibration LLM Judge Harness | `eval/judge.py`, `eval/judge_prompt.md` | `python eval\judge.py --criterion groundedness` | **PASS (Harness engineered & tested)** |
+| **Gate 4** | Calibration LLM Judge Harness | `eval/judge.py`, `eval/judge_prompt.md` | `python eval\judge.py --criterion groundedness` | **ENGINEERED / CALIBRATION PENDING (Pending live baseline)** |
 | **Gate 5** | Khóa Ngưỡng trước Run | `deliverables/evidence/thresholds-locked.md` | Đối chiếu timestamp & threshold | **PASS (Thresholds locked before run)** |
-| **Gate 5** | Scorecard theo Slice | `deliverables/evidence/scorecard-v1.md` | Merge metadata + results + verdicts | **READY (Script prepared)** |
-| **Gate 6** | Báo cáo A→Z 7 mục | `deliverables/REPORT.md` | Đọc báo cáo hoàn chỉnh | **PASS (7-section report structured)** |
-| **Gate 6** | Quyết định Release (Verdict) | `deliverables/REPORT.md` (Mục 7) | Phê duyệt từ PM/Nhóm | **DRAFTED (Ship with conditions framework)** |
+| **Gate 5** | Scorecard theo Slice | `deliverables/evidence/scorecard-v1.md` | Merge metadata + results + verdicts | **THRESHOLDS LOCKED / FINAL SCORECARD PENDING** |
+| **Gate 6** | Báo cáo A→Z 7 mục | `deliverables/REPORT.md` | Đọc báo cáo hoàn chỉnh | **REPORT DRAFTED / FINAL VERDICT PENDING** |
+| **Gate 6** | Quyết định Release (Verdict) | `deliverables/REPORT.md` (Mục 7) | Phê duyệt từ PM/Nhóm | **PENDING REAL EVALUATION** |
