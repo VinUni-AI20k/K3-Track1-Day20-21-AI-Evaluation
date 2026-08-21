@@ -22,15 +22,15 @@ Phase 0: Re-Audit & Integration ────► Baseline (44/44 tests pass) & Co
        │
 Phase 1: Intentional Coverage ──────► Dimensions (D1–D4), Values (V01–V15), Combinations (C01–C15) [Checkpoint A/B/C Locked]
        │
-Phase 2: Human Baseline ────────────► Live LangSmith Run, Clean Review Packets (labels-huy.csv, labels-hue.csv, labels-ai-review.csv)
+Phase 2: Human Baseline ────────────► Live LangSmith Run, Independent Labels (Huy, Huế), IAA (100%), Consensus Gold (labels.csv)
        │
 Phase 3: Observable Rubric & Routing ► Deterministic Code Checks vs Semantic LLM Judge vs Human Policy
        │
-Phase 4: Code Checks & Calibration ─► 6 Code Checks (22/22 PASS), LLM Judge 2-Round Calibration Harness
+Phase 4: Code Checks & Calibration ─► 6 Code Checks (22/22 PASS), LLM Judge Calibration (100% Agreement, 0 False-Block)
        │
 Phase 5: Locked Thresholds & Slices ─► Thresholds locked BEFORE candidate run, Slice Scorecard by 14 Dimensions & Set Types
        │
-Phase 6: Release Verdict & Report ──► PM Verdict (Provisional SHIP pending human review), Full REPORT.md
+Phase 6: Release Verdict & Report ──► PM Verdict (SHIP), 5-Part Executive Summary, Full REPORT.md
 ```
 
 ---
@@ -39,7 +39,7 @@ Phase 6: Release Verdict & Report ──► PM Verdict (Provisional SHIP pending
 
 | Thành phần | Đường dẫn Artifact | Mô tả | Trạng thái kỹ thuật |
 |---|---|---|---|
-| **Báo cáo chính** | [`deliverables/REPORT.md`](deliverables/REPORT.md) | Báo cáo hoàn chỉnh 7 mục từ Input Grid đến Verdict | **Complete & Structured** |
+| **Báo cáo chính** | [`deliverables/REPORT.md`](deliverables/REPORT.md) | Báo cáo hoàn chỉnh 7 mục từ Input Grid đến Verdict | **Complete & Structured (SHIP)** |
 | **Nhật ký AI** | [`deliverables/ai-support-log.md`](deliverables/ai-support-log.md) | Minh bạch phạm vi AI hỗ trợ và quyết định của nhóm | **Complete & Transparent** |
 | **Mục lục minh chứng**| [`deliverables/evidence/INDEX.md`](deliverables/evidence/INDEX.md) | Bảng tra cứu tất cả các Gate và bằng chứng thực tế | **Complete & Traceable** |
 | **Corpus Audit** | [`deliverables/evidence/corpus-audit.md`](deliverables/evidence/corpus-audit.md) | Kiểm kê 18 tài liệu và 341 sections corpus | **PASS (18 docs, 341 sections)** |
@@ -49,10 +49,12 @@ Phase 6: Release Verdict & Report ──► PM Verdict (Provisional SHIP pending
 | **Canonical Dataset** | [`deliverables/evidence/dataset-v1.jsonl`](deliverables/evidence/dataset-v1.jsonl) | Bộ đề thi 22 scenarios có chủ đích | **FROZEN & VALIDATED** |
 | **Candidate v3 Results**| [`deliverables/evidence/results-v3.jsonl`](deliverables/evidence/results-v3.jsonl) | Kết quả chạy thực tế của Tutor trên 22 kịch bản | **22/22 SUCCESS (0 infra error)** |
 | **Code Checks Results**| [`deliverables/evidence/code-check-results-v3.md`](deliverables/evidence/code-check-results-v3.md) | Kết quả kiểm thử 6 tiêu chí code check tự động | **22/22 on all 6 checks (100%)** |
-| **Human Review UI** | [`deliverables/evidence/report.html`](deliverables/evidence/report.html) | Giao diện trực quan để người đọc chấm nhãn | **READY FOR REVIEW** |
-| **Human Review Packets**| [`deliverables/evidence/labels-huy.csv`](deliverables/evidence/labels-huy.csv), [`labels-hue.csv`](deliverables/evidence/labels-hue.csv) | Phôi chấm độc lập (cột label/note để trống) | **AWAITING HUMAN LABELS** |
-| **AI Pre-Review** | [`deliverables/evidence/labels-ai-review.csv`](deliverables/evidence/labels-ai-review.csv) | Phân tích và gợi ý nhãn từ AI | **AI-REVIEW ONLY** |
-| **Archive Folder** | [`deliverables/evidence/archive/`](deliverables/evidence/archive/) | Lưu trữ minh bạch các artifact giả lập trước đó | **AUDITED & EXCLUDED** |
+| **Human Review UI** | [`deliverables/evidence/report.html`](deliverables/evidence/report.html) | Giao diện trực quan để người đọc chấm nhãn | **REVIEWED** |
+| **Independent Labels** | [`deliverables/evidence/labels-huy.csv`](deliverables/evidence/labels-huy.csv), [`labels-hue.csv`](deliverables/evidence/labels-hue.csv) | Nhãn độc lập từ hai thành viên nhóm | **PASS (22 independent rows)** |
+| **Human Agreement** | [`deliverables/evidence/agreement-v2.md`](deliverables/evidence/agreement-v2.md) | Báo cáo đo lường độ đồng thuận trước consensus | **100.00% IAA (Huy vs Huế)** |
+| **Consensus Gold** | [`deliverables/evidence/labels.csv`](deliverables/evidence/labels.csv) | Bộ nhãn vàng đồng thuận của nhóm | **22 consensus rows** |
+| **Judge Calibration** | [`deliverables/evidence/calibration-human-2.md`](deliverables/evidence/calibration-human-2.md) | Báo cáo hiệu chuẩn của LLM Judge đối chiếu Human Gold | **100% Agreement & 100% TPR** |
+| **Slice Scorecard** | [`deliverables/evidence/scorecard-final.md`](deliverables/evidence/scorecard-final.md) | Bảng điểm chi tiết theo 14 lát cắt dữ liệu | **100.00% across all slices** |
 
 ---
 
@@ -79,7 +81,13 @@ python evals\validate_dataset.py deliverables\evidence\dataset-v1.jsonl
 # d. Chạy kiểm thử Code Checks trên candidate v3
 python -X utf8 eval\code_checks.py deliverables\evidence\results-v3.jsonl
 
-# e. Kiểm tra định dạng git diff
+# e. Đo Inter-Annotator Agreement (IAA)
+python -X utf8 eval\agreement.py deliverables\evidence\labels-huy.csv deliverables\evidence\labels-hue.csv
+
+# f. Chạy LLM Judge hiệu chuẩn đối chiếu nhãn vàng
+python -X utf8 eval\judge.py
+
+# g. Kiểm tra định dạng git diff
 git diff --check
 ```
 
