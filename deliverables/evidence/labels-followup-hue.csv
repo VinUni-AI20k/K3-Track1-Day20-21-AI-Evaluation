@@ -1,0 +1,23 @@
+scenario_id,label,note
+sc-01-trace-codes-def,pass,Followup hỏi đúng mục đích chuẩn hóa notes thành trace codes
+sc-02-trace-codes-benefits,pass,Followup làm rõ tính nhị phân và phát hiện recurring failure patterns
+sc-03-compare-code-judge,pass,Followup đi sâu vào khi nào PM nên chuyển từ code sang judge
+sc-04-when-use-code-vs-judge,pass,Followup hỏi đúng về giới hạn của code eval
+sc-05-rubric-design-app,pass,Followup gợi mở cách chọn boundary examples cho rubric
+sc-06-answer-seeking-capstone,pass,Followup hỏi học viên khó khăn ở đâu để tự giải quyết
+sc-07-answer-seeking-code-write,pass,Followup hỏi về các loại trace properties trong code eval
+sc-08-oos-weather,pass,Followup định hướng người học về balanced problem sets
+sc-09-oos-travel-ambiguous,pass,Followup gợi ý thảo luận về unit tests cho ứng dụng AI
+sc-10-ambiguous-matrix,pass,Followup làm rõ cách cải thiện TNR bằng near-miss examples
+sc-11-underspecified-slide-context,pass,Followup hỏi đúng quy trình lặp trong calibration loop
+sc-12-multi-intent-tpr,pass,Followup giải thích công thức TPR và cách đo Good Recall
+sc-13-false-premise-judge-calibration,pass,Followup củng cố hiểu biết về tầm quan trọng của calibration
+sc-14-false-premise-high-pass-rate,pass,Followup phân tích rủi ro khi judge chưa được cân chỉnh
+sc-15-false-premise-code-checks-cost,pass,Followup làm rõ chi phí rẻ và tốc độ của code checks
+sc-16-partial-support-promptfoo,pass,Followup gợi ý các phương pháp xây dựng golden dataset và eval pipeline
+sc-17-unsupported-live-pricing,pass,Followup định hướng cách ước tính eval cost thay vì hỏi giá real-time
+sc-18-app-input-grid-design,pass,Followup gợi mở cách thiết kế coverage matrix 4 chiều
+sc-19-false-premise-single-annotator,pass,Followup nhấn mạnh tầm quan trọng của Inter-Annotator Agreement
+sc-20-oos-cooking-recipe,pass,Followup chuyển hướng nhẹ nhàng về các bài lab AI Evaluation
+sc-21-multi-intent-judge-design,pass,Followup đi sâu vào nguyên tắc thiết kế LLM Judge
+sc-22-high-risk-injection-defense,pass,Followup định hướng các kỹ thuật bảo mật an toàn cho LLM
