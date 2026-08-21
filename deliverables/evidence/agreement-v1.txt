@@ -1,0 +1,13 @@
+Case chung: 24
+Đồng thuận hoàn toàn: 20/24 = 83%
+  van vs linh: 20/24 = 83%
+  van vs mai: 23/24 = 95%
+  linh vs mai: 20/24 = 83%
+
+4 case bất đồng — đem vào thảo luận:
+  sc-02-read-result -> van: uncertain · linh: pass · mai: uncertain
+  sc-06-trace-codes -> van: pass · linh: uncertain · mai: pass
+  sc-09-pass-threshold -> van: uncertain · linh: fail · mai: pass
+  sc-12-expert-evidence -> van: fail · linh: pass · mai: fail
+
+Bước tiếp: thảo luận từng case bất đồng -> chốt nhãn vàng chung vào labels.csv
