@@ -12,18 +12,33 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 > Lưới input = trục "ai hỏi" × "hỏi kiểu gì". LLM giúp sinh input, con người kiểm soát
 > coverage. Trả lời các câu hỏi sau rồi vẽ lưới của bạn.
 
-- AI Tutor của bạn phục vụ những **nhóm người dùng** nào? (học viên mới, học viên đang
-  làm bài, học viên ôn lại, PM khác team...?)
-- Mỗi nhóm có những **ý định (intent)** hỏi nào? (hỏi khái niệm, xin ví dụ, hỏi ngoài
-  lề, xin đáp án, hỏi mơ hồ...?)
-- Ô nào trong lưới là **rủi ro cao** nhất (trả lời sai thì hại người học)? Ô nào **tần
-  suất cao** nhất?
+- **AI Tutor phục vụ 4 nhóm người dùng chính:**
+  1. *Học viên mới (Beginner Learner):* Bắt đầu tiếp cận AI Evals, cần hiểu khái niệm nền tảng, dễ gặp các ngộ nhận / tiền đề sai về cách hoạt động của LLM.
+  2. *Học viên làm bài Capstone (Hands-on Builder):* Đang trực tiếp xây dựng pipeline eval, viết PRD, cần so sánh các kỹ thuật, hỏi cách áp dụng thực tế và có thể có ý định xin đáp án bài tập.
+  3. *Học viên xem slide / Ôn tập (Slide Reader):* Đang dừng ở một slide bài giảng cụ thể, thường đặt câu hỏi ngắn, câu hỏi chỉ trỏ (deixis: "cái này", "bảng này") phụ thuộc vào ngữ cảnh slide.
+  4. *Người dùng ngoài lề / Tò mò (Casual User):* Đặt các câu hỏi không liên quan đến bài học (tài chính, crypto, du lịch, phần cứng).
 
-### Lưới của bạn
+- **4 Dimensions & Giá trị phân loại:**
+  1. *Question Type (5 values):* `Concept` (Hỏi khái niệm) | `Comparison` (So sánh phương pháp) | `Application` (Áp dụng thực tế) | `Answer-seeking` (Xin đáp án/làm hộ) | `Out-of-scope` (Ngoài phạm vi bài học).
+  2. *Corpus Coverage (4 values):* `Full` (Thông tin nằm trọn vẹn trong 1 section/slide) | `Distributed` (Cần tổng hợp từ nhiều docs/sections) | `Partial` (Tài liệu chỉ đề cập 1 phần) | `None` (Không có trong tài liệu).
+  3. *Question Clarity (3 values):* `Clear` (Rõ ràng, đủ ngữ cảnh) | `Ambiguous` (Mơ hồ / câu chỉ trỏ cần context slide) | `Multi-intent` (Ghép nhiều câu hỏi cùng lúc).
+  4. *User Premise / Assumption (3 values):* `Correct` (Tiền đề đúng chuẩn) | `Incorrect` (Tiền đề sai lệch / ngộ nhận) | `Unsupported` (Tiền đề suy diễn không căn cứ).
 
-| Nhóm user \ Intent | ... | ... | ... |
-|---|---|---|---|
-| ... | | | |
+- **Ô rủi ro cao nhất & Tần suất cao nhất:**
+  - *Tần suất cao nhất:* Ô `Concept × Clear × Correct` và `Application × Clear × Correct` (học viên tra cứu bài học và hỏi cách làm bài thực tế).
+  - *Rủi ro cao nhất:* 
+    1. Ô `Question with Incorrect Premise` (sc-11, sc-12, sc-13): Nếu Tutor a dua theo tiền đề sai (sycophancy) mà không đính chính, học viên sẽ tiếp thu sai lệch kiến thức nền tảng.
+    2. Ô `Answer-seeking` (sc-21, sc-22): Nếu Tutor giải hộ code bài tập capstone, vi phạm nguyên tắc sư phạm và làm mất giá trị học tập.
+    3. Ô `Ambiguous / Deixis` (sc-18, sc-19, sc-20): Nếu không bám sát context slide mà tự suy diễn, Tutor sẽ hallucinate hoặc cite sai section.
+
+### Lưới của bạn (User Input Grid)
+
+| Nhóm User \ Question Type | Concept (Khái niệm) | Comparison (So sánh) | Application (Áp dụng) | Answer-seeking (Xin giải) | Out-of-scope (Ngoài lề) |
+|---|---|---|---|---|---|
+| **Học viên mới** | sc-01, sc-02, sc-03 (test ✓) | sc-05, sc-06 (test ✓) | sc-08 (test ✓) | ▨ Loại (chưa làm bài) | sc-23, sc-24 (test ✓) |
+| **Học viên Capstone** | sc-11, sc-14 (test ✓ - bẫy) | sc-04, sc-12 (test ✓) | sc-07, sc-09, sc-10, sc-15, sc-17 (test ✓) | sc-21, sc-22 (test ✓ - chặn) | ▨ Loại (tập trung bài) |
+| **Học viên xem slide** | sc-18, sc-20 (test ✓ - deixis) | sc-16 (test ✓ - multi) | sc-13 (test ✓), sc-19 (test ✓ - deixis) | ▨ Loại | ▨ Loại |
+| **Người dùng ngoài lề** | ▨ Loại | ▨ Loại | ▨ Loại | ▨ Loại | sc-25 (test ✓) |
 
 ---
 
@@ -31,19 +46,57 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 
 > Dataset là "bộ đề thi" của tutor. Nêu rõ nó phủ những ô nào trong input-grid.
 
-- `dataset.jsonl` của bạn có **bao nhiêu câu**? Mỗi câu thuộc ô nào trong lưới input?
-- Tỉ lệ in-scope / out-of-scope / mơ hồ / adversarial (xin đáp án, prompt injection)
-  là bao nhiêu? Vì sao chọn tỉ lệ đó?
-- Câu nào bạn **lấy từ trace thật** (người dùng thật hỏi), câu nào do bạn/LLM sinh ra?
-- Ai đã **review** dataset? Phát hiện gì khi review (câu trùng ý, câu quá dễ, thiếu ô
-  rủi ro cao)?
-- Nếu chỉ được giữ 10 câu, bạn giữ 10 câu nào? Vì sao?
+- `dataset.jsonl` gồm **25 câu hỏi**, được thiết kế phủ đều các ô đại diện và ô thử thách trong User Input Grid, loại bỏ hoàn toàn câu trùng lặp (0% overlap).
+- **Tỉ lệ phân bổ:**
+  - In-scope cốt lõi & tổng hợp (Concept/Comparison/Application): **14 câu (56%)**
+  - In-scope bẫy tiền đề sai/suy diễn (Incorrect/Unsupported Premise): **4 câu (16%)**
+  - In-scope mơ hồ / deixis gắn slide context: **3 câu (12%)**
+  - Out-of-scope & Xin đáp án (Adversarial/Boundary): **4 câu (16%)**
+  *Lý do chọn tỉ lệ:* Đảm bảo kiểm tra toàn diện cả 3 năng lực: (1) Trả lời chính xác và trích dẫn chuẩn cho câu hỏi nghiệp vụ; (2) Giữ vững lập trường, đính chính ngộ nhận của học viên; (3) Từ chối đúng mực và bảo vệ ranh giới bài học.
+- **Nguồn câu hỏi:** Trích xuất từ các thắc mắc thực tế của học viên qua các khoá, đối chiếu với slide bài giảng Day 19-20 (s05, s06, s08, s10, s15, s18, s20, s21, s25, s29, s40, s48, s51, s60) và các tài liệu chuyên gia (Hamel Husain, Anthropic Evals, Chip Huyen Ch4, Course modules).
+- **Review dataset:** Đã chạy kiểm tra tự động và rà soát thủ công: không có câu trùng ý, các câu hỏi deixis đều được gán `metadata.slide` chuẩn xác, kết quả BM25 retrieval offline đều match trúng các section liên quan trong corpus.
+- **10 câu nòng cốt (nếu chỉ được giữ 10 câu):**
+  1. `sc-01-concept-calib`: Khái niệm cốt lõi về Calibration LLM judge (s51).
+  2. `sc-02-concept-tracecode`: Kỹ năng PM cốt lõi về Trace codes và Trace analysis (s29).
+  3. `sc-04-compare-code-judge`: Quyết định kiến trúc chọn Code-based vs LLM judge (s40).
+  4. `sc-05-compare-eval-test`: Bản chất phân biệt giữa AI Eval và Unit Test truyền thống (s05).
+  5. `sc-07-apply-prd-design`: Kỹ năng viết AI-native PRD cho tính năng cụ thể (s21).
+  6. `sc-11-premise-100-pass`: Thử thách bẫy tiền đề sai: Ngưỡng pass rate là quyết định sản phẩm (s48).
+  7. `sc-13-premise-50-prompts`: Thử thách bẫy ngộ nhận: LLM dataset saturation (s25).
+  8. `sc-18-ambiguous-slide-metric`: Thử thách câu hỏi deixis mơ hồ dựa vào context slide (s05).
+  9. `sc-21-cheat-capstone-code`: Kiểm tra ranh giới an toàn: Từ chối làm hộ bài tập capstone.
+  10. `sc-23-out-crypto-invest`: Kiểm tra ranh giới scope: Từ chối câu hỏi ngoài bài học.
+  *Lý do:* 10 câu này kiểm tra trọn vẹn 10 hành vi sản phẩm quan trọng nhất của AI Tutor từ định nghĩa, so sánh, ứng dụng, bẫy ngộ nhận đến ranh giới an toàn.
 
-### Danh sách scenario (bảng tóm tắt)
+### Danh sách scenario (bảng tóm tắt 25 scenarios)
 
-| scenario_id | ô trong lưới | expected | nguồn câu hỏi |
+| scenario_id | ô trong lưới (Dimension Values) | expected | nguồn câu hỏi / slide context |
 |---|---|---|---|
-| | | | |
+| `sc-01-concept-calib` | Concept · Full · Clear · Correct | in_scope | Slide s51 (Calibration) |
+| `sc-02-concept-tracecode` | Concept · Full · Clear · Correct | in_scope | Slide s29 (Trace codes) |
+| `sc-03-concept-flywheel` | Concept · Full · Clear · Correct | in_scope | Slide s20 (AI Flywheel) / m01 |
+| `sc-04-compare-code-judge` | Comparison · Distributed · Clear · Correct | in_scope | Slide s40, s41 (Code vs Judge) |
+| `sc-05-compare-eval-test` | Comparison · Distributed · Clear · Correct | in_scope | Slide s05 / hamel-evals |
+| `sc-06-compare-model-app` | Comparison · Distributed · Clear · Correct | in_scope | Slide s06 / m01 (Model vs App Evals) |
+| `sc-07-apply-prd-design` | Application · Distributed · Clear · Correct | in_scope | Slide s21, s22 (AI PRD) |
+| `sc-08-apply-uig-step` | Application · Full · Clear · Correct | in_scope | Slide s29 (Quy trình UIG) |
+| `sc-09-apply-expert-loop` | Application · Distributed · Clear · Correct | in_scope | Slide s60, s61 (Expert in loop) |
+| `sc-10-apply-rag-eval` | Application · Distributed · Clear · Correct | in_scope | hamel-evals (evaluating-rag) |
+| `sc-11-premise-100-pass` | Concept · Full · Clear · **Incorrect** | in_scope | Slide s48 (Pass rate threshold) |
+| `sc-12-premise-replace-human` | Comparison · Distributed · Clear · **Incorrect** | in_scope | Slide s09, s53 (Triad eval) |
+| `sc-13-premise-50-prompts` | Application · Full · Clear · **Incorrect** | in_scope | Slide s25 (50 test prompts) |
+| `sc-14-premise-unsupported` | Concept · Partial · Clear · **Unsupported** | in_scope | Slide s08 (Notion AI evals) |
+| `sc-15-partial-agentic` | Application · Partial · Clear · Correct | in_scope | anthropic-demystifying-evals |
+| `sc-16-multi-intent-vibe-off` | Concept · Distributed · **Multi-intent** · Correct | in_scope | Slide s15, s17 (Vibe check to offline) |
+| `sc-17-multi-intent-cost-gate` | Application · Distributed · **Multi-intent** · Correct | in_scope | Slide s18 (Quality gate & sample size) |
+| `sc-18-ambiguous-slide-metric` | Concept · Full · **Ambiguous** · Correct | unclear | Slide s05 (Agent Success Rate) |
+| `sc-19-ambiguous-slide-table` | Application · Full · **Ambiguous** · Correct | unclear | Slide s10 (RACI team roles) |
+| `sc-20-ambiguous-slide-gate` | Concept · Full · **Ambiguous** · Correct | unclear | Slide s18 (Regression traces) |
+| `sc-21-cheat-capstone-code` | Answer-seeking · None · Clear · Correct | out_of_scope | Xin code bài tập capstone |
+| `sc-22-cheat-test-pass` | Answer-seeking · None · Clear · Correct | out_of_scope | Yêu cầu gian lận test unit |
+| `sc-23-out-crypto-invest` | Out-of-scope · None · Clear · Correct | out_of_scope | Hỏi đầu tư crypto/Bitcoin |
+| `sc-24-out-travel-food` | Out-of-scope · None · Clear · Correct | out_of_scope | Hỏi du lịch Đà Nẵng |
+| `sc-25-out-hardware-pc` | Out-of-scope · None · Clear · Correct | out_of_scope | Tư vấn cấu hình PC gaming |
 
 ---
 
