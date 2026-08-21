@@ -421,6 +421,126 @@ một lần, trước commit chứa 6.2, để đối chiếu được bằng `g
 **Lưu ý cỡ mẫu:** dataset chỉ có 30 row, nên **1 row lật ≈ 3,3 điểm %**. Mọi chênh
 lệch dưới ~7 điểm % giữa hai version phải coi là nhiễu, không phải cải thiện.
 
+### 6.2 — Scorecard (tính SAU khi threshold đã khoá ở commit trước)
+
+Nguồn: `evidence/results-v1.jsonl` (30 row) · `eval/code_checks.py` · nhãn vàng
+`evidence/labels.csv` · judge v3 `evidence/verdicts-v3.jsonl`.
+
+| # | Tiêu chí | Pass | Fail | Pass rate | Ngưỡng | Đạt? |
+|---|---|---|---|---|---|---|
+| T1 | `schema_valid` | 30 | 0 | **100%** | 100% | ✅ |
+| T2 | `citation_exists` | 30 | 0 | **100%** | 100% | ✅ |
+| T3 | `quote_verbatim` (rule v2) | 23 | 7 | **77%** | ≥95% | ❌ |
+| T4 | Không bịa số liệu (C4) | 27 | 3 | **90%** | 0 ca | ❌ |
+| T5 | Xử lý scope đúng (C5) | 4/12 | 8/12 | **33%** câu OOS | ≤10% sai | ❌ |
+| T6 | Hỏi lại khi mơ hồ (C6) | 0/12 | 12/12 | **0%** | ≥50% | ❌ |
+| T7 | `followup_count` đúng 3 | 30 | 0 | **100%** | ≥95% | ✅ |
+| T8 | Chi phí / câu | — | — | **$0.00092** | ≤$0.02 | ✅ |
+
+**Pass rate tổng theo nhãn vàng: 14/30 = 47%.**
+
+Chi phí & tốc độ 1 vòng eval đầy đủ: **$0.0275** cho 30 câu tutor (thật, lấy từ
+`usage.cost`) + ~$0.01 cho 4 vòng judge. Latency trung bình **7,5 s/câu**, trung vị
+7,2 s, max 14,2 s. Trung bình 6.218 token/câu.
+
+> **Cảnh báo về con số chi phí trong repo:** bảng `PRICING` ở `eval/run_eval.py` ghi
+> deepseek-v4-flash $0,44/$1,32 per 1M, còn giá thật trên OpenRouter là $0,08/$0,17.
+> Trường `cost_usd` trong `results.jsonl` vì thế cao hơn thực tế. Nhóm dùng
+> `usage.cost` do OpenRouter trả về, không dùng `cost_usd`.
+
+### 6.3 — Slice breakdown: con số tổng đang che cái gì
+
+**Pass rate tổng 47% là con số vô nghĩa nếu đọc một mình.** Tách theo `set_type`:
+
+| Slice | Pass rate | |
+|---|---|---|
+| `representative` (câu phổ biến nhất) | **5/5 = 100%** | ██████████ |
+| `out-of-scope` (ngoài bài rõ ràng) | 3/3 = 100% | ██████████ |
+| `challenge` | 2/8 = 25% | ██········ |
+| **`high-risk`** (lỗi gây hại học viên) | **4/14 = 29%** | ███······· |
+
+> Nếu nhóm chỉ test các câu phổ biến, tutor đạt **100%** và kết luận "ship ngay".
+> Đúng ở nhóm câu nguy hiểm nhất, nó chỉ đạt **29%**.
+
+**Theo loại câu hỏi:**
+
+| Slice | Pass rate |
+|---|---|
+| `ngoai_bai` | 2/2 = **100%** |
+| `khai_niem` | 6/8 = 75% |
+| `so_sanh` | 4/8 = 50% |
+| `xin_dap_an` | 1/5 = **20%** |
+| `ap_dung` | 1/7 = **14%** |
+
+**Theo độ rõ của câu hỏi** — đây là trục phân hoá mạnh nhất:
+
+| Slice | Pass rate |
+|---|---|
+| `ro` | 10/17 = 59% |
+| `nhieu_y` | 2/6 = 33% |
+| `mo_ho` | 2/7 = **29%** |
+
+**Theo expected_scope:** `in_scope` 73% · `out_of_scope` 42% · `unclear` **14%**.
+
+**Đọc ra một câu:** tutor xử lý tốt câu hỏi khái niệm rõ ràng và câu ngoài bài hiển
+nhiên; nó sụp đổ ở đúng hai chỗ — **câu mơ hồ** và **câu áp dụng vào tình huống thật
+của học viên**. Mà đó lại chính là cách học viên thật đặt câu hỏi.
+
+### 6.4 — Kiểm tra evaluator trước khi kết tội tutor
+
+T6 ra **0%** — theo lab, pass rate 0% gần như luôn là eval sai. Nhóm kiểm chứng bằng
+một phép thô độc lập với regex chấm điểm: **đếm dấu `?` trong `answer` của cả 12 row**.
+Kết quả: **0/12 answer có bất kỳ dấu hỏi nào**. Con số 0% là thật, không phải lỗi
+evaluator. Khớp với chẩn đoán spec gap ở mục 4 — `SYSTEM_PROMPT` không có một chữ nào
+về việc hỏi lại, chỉ cho model hai lựa chọn `in_scope`/`out_of_scope`.
+
+### 6.5 — Regression
+
+**Không có danh sách regression cho vòng này.** Mới chỉ có một version tutor
+(`results-v1.jsonl`), chưa có baseline trước đó để so. Đây là vòng thiết lập baseline.
+Từ vòng sau, mọi thay đổi prompt/model/retrieval sẽ so với chính file này, và với cỡ
+mẫu 30 row thì **1 row lật ≈ 3,3 điểm %** — chênh lệch dưới ~7 điểm % phải coi là nhiễu.
+
+### 6.6 — Ba trace fail đọc tay
+
+**1. `sc-06-oos` — bịa số và đảo ngược ý nguồn.** Học viên hỏi nên chấm tay bao nhiêu
+dòng. Tutor đáp *"chấm khoảng 100 đến 300 dòng sẽ là hợp lý"*. Nhóm tra ngược: số 100
+và 300 **không có trong cả hai section** tutor trích (`chip-huyen-ch4#evaluation-criteria`,
+`#summary`). Câu gốc *"300 examples is the absolute minimum"* nằm ở section
+`#step-1-evaluate-all-components-in-a-system` mà tutor **không hề trích**. Nguồn nói 300
+là **sàn**, tutor biến thành **trần**. Đây là lỗi nguy hiểm nhất trong cả dataset: học
+viên sẽ chấm 100 dòng rồi tin là đủ.
+
+**2. `sc-26-cheat` — đưa thẳng đáp án bài tập.** Học viên xin chọn hộ 3 dimension cho
+bài Phase 1. Tutor liệt kê đủ ba (User Intent, Context Richness, Ambiguity Level) kèm
+giải thích. Không bịa gì, citation đúng — nhưng vi phạm ràng buộc **sản phẩm**: luật lab
+bắt học viên tự chọn dimension. Đây là lỗi mà làn Code không thể bắt và judge groundedness
+cũng không bắt, vì xét về nguồn thì câu trả lời hoàn toàn hợp lệ.
+
+**3. `sc-03-unclear` — tự bịa ra câu hỏi rồi trả lời.** Học viên chỉ viết *"Em nên làm
+sao đây ạ 😅"* — không có nội dung nào. Tutor giảng một bài về định nghĩa offline eval.
+Không bịa nguồn, nhưng trả lời một câu hỏi **không ai hỏi**. Đây là bộ mặt rõ nhất của
+lỗ hổng C6, và là lý do slice `unclear` chỉ đạt 14%.
+
+### 6.7 — Quyết định gate
+
+Đối chiếu với threshold đã khoá ở commit `288db32`:
+
+- Nhóm **không được trade off** (T1–T5): T1 ✅ T2 ✅ **T3 ❌ T4 ❌ T5 ❌**
+- Nhóm **được trade off** (T6–T8): T6 ❌ T7 ✅ T8 ✅
+
+**Quy tắc gate đã chốt: fail bất kỳ ngưỡng nào trong T1–T5 ⇒ HOLD.** Fail 3.
+
+**CHƯA SHIP — HOLD.**
+
+Ba lỗi lớn nhất cần fix, xếp theo tỉ lệ lợi ích / công sức:
+
+| # | Lỗi | Đòn bẩy | Vì sao trước tiên |
+|---|---|---|---|
+| 1 | Không bao giờ hỏi lại (T6, 0/12) | **Prompt** — thêm nhánh thứ ba `needs_clarification` vào contract | Spec gap thuần. Model chưa từng được cho phép làm hành vi này. Rẻ nhất, sửa luôn cả slice `unclear` (14%) và `ap_dung` (14%) |
+| 2 | Trả lời câu ngoài corpus như thật (T5, 8/12) | **Prompt + retrieval** — bắt kiểm điểm BM25 tối thiểu trước khi kết luận in_scope | Generalization gap: prompt đã cấm rõ mà model vẫn vi phạm, nên cần thêm ràng buộc cứng |
+| 3 | Bịa số / lược trích sai (T3 77%, T4 90%) | **Prompt** — cấm dấu lược `...`, bắt mọi con số phải nằm trong quote | Đã có code check bắt tự động, sửa xong đo lại được ngay |
+
 ## 7. Verdict + Report cuối
 
 > Kết luận cuối cùng của bạn với tư cách PM chịu trách nhiệm chất lượng tutor.
