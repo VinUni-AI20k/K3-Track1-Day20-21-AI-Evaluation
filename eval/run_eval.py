@@ -1,4 +1,4 @@
-﻿"""Chạy tutor trên toàn bộ dataset -> results.jsonl (kèm latency, tokens, chi phí).
+"""Chạy tutor trên toàn bộ dataset -> results.jsonl (kèm latency, tokens, chi phí).
 
 Cách dùng:  python3 eval/run_eval.py [dataset.jsonl]
 Mặc định đọc dataset.jsonl ở root repo; nếu chưa có thì copy data/dataset.example.jsonl làm mẫu.
@@ -97,6 +97,7 @@ def main():
             rec.update(error=str(e))
             print("LỖI: %s" % e)
         results.append(rec)
+        time.sleep(3)  # khoảng dừng an toàn giữa các câu hỏi để tránh rate limit
 
     with open("results.jsonl", "w", encoding="utf-8") as f:
         for rec in results:
