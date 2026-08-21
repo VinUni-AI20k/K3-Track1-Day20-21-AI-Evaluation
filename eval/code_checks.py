@@ -86,11 +86,13 @@ def check_scope_contract(rec):
         return None, "bỏ qua (JSON vỡ)"
     scope = out.get("scope")
     n = len(out.get("sources") or [])
-    if scope == "out_of_scope" and n > 0:
-        return False, f"out_of_scope nhưng vẫn trích {n} nguồn"
+    if scope in ("out_of_scope", "needs_clarification") and n > 0:
+        return False, f"{scope} nhưng vẫn trích {n} nguồn"
     if scope == "in_scope" and n == 0:
         return False, "in_scope nhưng sources rỗng"
-    if scope not in ("in_scope", "out_of_scope"):
+    if scope == "needs_clarification" and "?" not in (out.get("answer") or ""):
+        return False, "needs_clarification nhưng answer không có câu hỏi lại"
+    if scope not in ("in_scope", "out_of_scope", "needs_clarification"):
         return False, f"scope không hợp lệ: {scope!r}"
     return True, None
 

@@ -541,6 +541,104 @@ Ba lỗi lớn nhất cần fix, xếp theo tỉ lệ lợi ích / công sức:
 | 2 | Trả lời câu ngoài corpus như thật (T5, 8/12) | **Prompt + retrieval** — bắt kiểm điểm BM25 tối thiểu trước khi kết luận in_scope | Generalization gap: prompt đã cấm rõ mà model vẫn vi phạm, nên cần thêm ràng buộc cứng |
 | 3 | Bịa số / lược trích sai (T3 77%, T4 90%) | **Prompt** — cấm dấu lược `...`, bắt mọi con số phải nằm trong quote | Đã có code check bắt tự động, sửa xong đo lại được ngay |
 
+### 6.8 — Vòng lặp cải thiện: sửa SYSTEM_PROMPT rồi đo lại
+
+> Ngoài phạm vi lab (lab không yêu cầu tối ưu prompt tutor), nhưng đây đúng là đòn bẩy
+> số 1 mà verdict HOLD chỉ ra. **Threshold giữ nguyên bản đã khoá ở commit `288db32`.**
+
+**Prompt v2 — ba sửa đổi nhắm ba ngưỡng đang fail:**
+
+1. Thêm nhánh `needs_clarification` vào contract, liệt kê 4 tình huống bắt buộc hỏi lại
+   (đại từ không tiền đề · câu không nội dung · xin áp dụng vào "case của em" mà không
+   mô tả · tiền đề sai) → nhắm **T6**.
+2. Cấm dấu lược `...` ghép quote; bắt mọi con số trong `answer` phải có nguyên văn
+   trong `quote`; cấm đổi chiều ý nguồn → nhắm **T3, T4**.
+3. "kb_search trả về section chỉ nhắc thoáng qua từ khoá KHÔNG có nghĩa là corpus phủ
+   được câu hỏi"; tách luật riêng cho câu xin đáp án → nhắm **T5**.
+
+**Prompt v2 sửa được đúng thứ nhắm tới nhưng làm hỏng chỗ khác:**
+
+| | v1 | v2 |
+|---|---|---|
+| Hỏi lại khi mơ hồ (T6) | 0% | **67%** ✅ |
+| Xử lý scope (T5) | 33% | 58% |
+| `schema_valid` | 100% | **93%** ❌ |
+| `citation_exists` | 100% | **90%** ❌ |
+| `quote_verbatim` | 77% | **57%** ❌ |
+
+Chẩn đoán: **completion tokens tăng 3,5 lần** (326 → 1.148/câu, max 2.183) vượt trần
+`max_tokens=2000` → cắt giữa JSON → vỡ. Gần như toàn bộ regression đến từ một nguyên
+nhân duy nhất là câu trả lời dài ra, **không phải** prompt sai nội dung: thực tế chỉ có
+**1** ca bịa citation thật (sc-05), 2 ca còn lại là hệ quả của JSON vỡ.
+
+> Bài học đo lường: truncation giả dạng thành lỗi chất lượng. Nếu không tra ngược
+> `completion_tokens`, nhóm đã kết luận sai rằng "siết quote làm tutor bịa nguồn nhiều hơn".
+
+**Prompt v3 — sửa đúng nguyên nhân gốc:** thêm ràng buộc độ dài (`answer` ≤200 từ,
+`needs_clarification` ≤60 từ, ≤3 nguồn) + nới `max_tokens` 2000 → 3000.
+
+### Kết quả v1 → v3 (cùng 30 câu, cùng threshold đã khoá)
+
+| Tiêu chí | v1 | v3 | Δ | Ngưỡng | v1 → v3 |
+|---|---|---|---|---|---|
+| `schema_valid` | 100% | 100% | +0 | 100% | ✅ → ✅ |
+| `citation_exists` | 100% | 100% | +0 | 100% | ✅ → ✅ |
+| `quote_verbatim` | 77% | 80% | +3 | ≥95% | ❌ → ❌ |
+| Xử lý scope đúng | 33% | 58% | **+25** | ≥90% | ❌ → ❌ |
+| Hỏi lại khi mơ hồ | 0% | **67%** | **+67** | ≥50% | ❌ → **✅** |
+| `followup_count` | 100% | 100% | +0 | ≥95% | ✅ → ✅ |
+
+**Pass rate tổng (mọi blocker đo được bằng code): 11/30 = 37% → 18/30 = 60%.**
+
+### Slice — đúng câu hỏi "có vượt được nhóm high-risk không"
+
+| Slice | v1 | v3 | Δ |
+|---|---|---|---|
+| **`high-risk`** | 3/14 = **21%** | 8/14 = **57%** | **+36** |
+| `challenge` | 2/8 = 25% | 5/8 = 62% | +38 |
+| `representative` | 4/5 = 80% | 3/5 = 60% | −20 ⚠️ |
+| `expected_scope = unclear` | 0/7 = **0%** | 5/7 = **71%** | **+71** |
+| `ap_dung` | 1/7 = 14% | 4/7 = 57% | +43 |
+| `xin_dap_an` | 1/5 = 20% | 3/5 = 60% | +40 |
+| `khai_niem` | 5/8 = 62% | 5/8 = 62% | +0 |
+
+⚠️ `representative` giảm 20 điểm nhưng slice này chỉ có **5 row** — 1 row lật = 20 điểm.
+Đây là nhiễu cỡ mẫu, không đủ căn cứ kết luận có regression thật ở nhóm câu phổ biến.
+
+### Regression đọc tay (2 ca)
+
+Lần này **đã có baseline** nên đo được regression thật.
+
+**`sc-10-in` và `sc-25-in`** — cả hai v1 pass, v3 fail, cùng một nguyên nhân:
+`quote_verbatim`. Ở v1 tutor trích từ tài liệu văn xuôi (`ai-evals-m04`, `ai-evals-m01`)
+và quote khớp. Ở v3 tutor chuyển sang trích slide deck (`slide-day19-20#s32`, `#s33`,
+`#s20`) với đoạn quote dài hơn nhiều, và trượt.
+
+Tra ngược tỉ lệ quote hỏng theo loại tài liệu:
+
+| | v1 | v3 |
+|---|---|---|
+| Trích từ slide deck | 1/17 = 6% | **7/15 = 47%** |
+| Trích từ tài liệu văn xuôi | 8/37 = 22% | 3/20 = **15%** |
+
+Slide **không** khó trích hơn về bản chất — v1 chứng minh điều ngược lại. Đây là tác
+dụng phụ của chính lệnh cấm trong prompt v3: cấm dấu lược `...` nên model không lược
+nữa mà copy nguyên cả đoạn dài bao gồm phần xen giữa. Mà `slide-day19-20` là text đã
+bị làm phẳng từ deck (block xáo trộn, xen dòng trống), nên đoạn càng dài càng dễ trượt.
+
+**Đòn bẩy tiếp theo không còn là prompt mà là corpus:** cần làm sạch layout của
+`slide-day19-20` trước, hoặc cho phép trích nhiều đoạn ngắn rời thành nhiều phần tử
+`sources` (prompt v3 đã nói nhưng model chưa làm theo).
+
+### Gate sau vòng v3
+
+- Không được trade off (T1–T5): T1 ✅ T2 ✅ **T3 ❌ (80% < 95%)** T4 chưa đo lại **T5 ❌ (58% < 90%)**
+- Được trade off (T6–T8): **T6 ✅ (67% ≥ 50%)** T7 ✅ T8 ✅
+
+**Vẫn HOLD** — nhưng đã đi được một quãng thật: nhóm high-risk từ 21% lên 57%, và tiêu
+chí T6 lần đầu đạt ngưỡng. Còn 2 ngưỡng cứng chưa qua, cả hai đều quy về cùng một việc:
+chất lượng trích dẫn và nhận diện phạm vi.
+
 ## 7. Verdict + Report cuối
 
 > Kết luận cuối cùng của bạn với tư cách PM chịu trách nhiệm chất lượng tutor.
