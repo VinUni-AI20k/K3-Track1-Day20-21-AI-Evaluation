@@ -9,3 +9,6 @@ labels.csv
 labels-*.csv
 report.html
 .env.backup-*
+
+# evidence/ là BÀI NỘP — luôn commit, kể cả khi trùng pattern scratch ở trên
+!deliverables/evidence/**
