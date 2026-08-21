@@ -30,6 +30,33 @@ Quy ước phiên bản: mỗi lần chạy lại là một version mới — `r
 `verdicts-v3.jsonl`... Không ghi đè file cũ; calibration report cần đối chiếu được
 từng vòng.
 
+## Cho thành viên chấm nhãn (Phase 2)
+
+Cả nhóm phải chấm trên **cùng một** `results.jsonl` — nếu mỗi người tự chạy
+`run_eval.py` thì output tutor sẽ khác nhau và con số agreement trở nên vô nghĩa
+(model đi qua OpenRouter, cùng `temperature=0` vẫn có thể ra kết quả khác vì
+request được định tuyến sang nhà cung cấp khác nhau).
+
+Bản có thẩm quyền là `evidence/results-v1.jsonl`. Sau khi `git pull origin dev`:
+
+```bash
+cp deliverables/evidence/results-v1.jsonl results.jsonl   # report.py chỉ đọc ở ROOT
+python3 eval/report.py && open report.html                # gán nhãn + note, rồi Export
+mv ~/Downloads/labels.csv labels-<tên-mình>.csv           # KHÔNG đè labels.csv
+```
+
+Chấm xong thì copy file của mình vào `evidence/` rồi commit:
+
+```bash
+cp labels-<tên-mình>.csv deliverables/evidence/
+python3 eval/agreement.py labels-*.csv                    # cần đủ 2-3 file mới chạy được
+```
+
+Lưu ý: `report.html` lưu nhãn trong localStorage của **từng trình duyệt trên từng
+máy** — đổi máy hoặc đổi browser là mất nhãn, nên Export ngay khi chấm xong.
+`labels.csv` (không có tên) dành riêng cho **nhãn vàng sau đồng thuận**, đừng dùng
+cho nhãn cá nhân.
+
 ## Checklist trước khi nộp
 
 - [ ] `deliverables/REPORT.md` đủ 7 mục (1 Input Grid … 7 Verdict); mục nào cũng có phần **quyết định + vì sao**
