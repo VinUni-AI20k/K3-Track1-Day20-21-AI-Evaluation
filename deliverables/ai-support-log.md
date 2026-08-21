@@ -1,47 +1,44 @@
-﻿# AI Support Log — Minh bạch hỗ trợ của Trí tuệ Nhân tạo
+# AI Support Log — VLearn AI Tutor Evaluation Lab
 
-Tài liệu ghi chép trung thực phạm vi đóng góp của AI Assistant (Antigravity/Gemini) và quyền sở hữu quyết định của các thành viên trong nhóm thực hiện bài Lab Track 1 Day 20–21.
-
----
-
-## 1. AI đã hỗ trợ ở những khâu nào?
-
-1. **Re-Audit & Tích hợp Kỹ thuật**:
-   - Quét cấu trúc repository, đối chiếu commit SHA của repository lớp (`ad2c1708e4db66df95b8d608c3fb15fc8a7c6a6f`), tích hợp an toàn các module `tutor/`, `eval/`, `tests/`, `deliverables/` mà không ghi đè dữ liệu lịch sử của người dùng trong `evals/phase1/`.
-   - Chạy và xác minh 44 offline tests đạt 100% PASS trên môi trường Windows PowerShell (UTF-8).
-2. **Corpus Integrity & Grounding Audit**:
-   - Viết kịch bản kiểm tra toàn diện 18 tài liệu gốc và 341 searchable sections trong `tutor/corpus/manifest.json`, kiểm tra khả năng truy xuất thực tế bằng `tutor.kb_search_local`.
-3. **Nâng cấp Hệ thống Test Harness**:
-   - Nâng cấp `eval/code_checks.py`: bổ sung 3 code checks mới (`scope_sources_consistency`, `followup_quality`, `sources_no_duplicates`) và xây dựng bộ unit test suite `tests/test_code_checks.py` đạt 15/15 PASS.
-   - Nâng cấp `eval/run_eval.py`: bảo toàn toàn bộ `metadata`, `expected_scope`, `note`, `timestamp` và `model_evaluated` để phục vụ phân tích lát cắt (slice analysis) theo D1–D4.
-   - Nâng cấp `eval/judge.py`: hỗ trợ tham số dòng lệnh linh hoạt (`--prompt`, `--labels`, `--output`, `--criterion`), bổ sung tính toán ma trận nhầm lẫn chi tiết, Good-output recall (True Positive Rate), Bad-output catch rate (True Negative Rate) và danh sách ca lệch.
-   - Bổ sung phòng thủ chống tấn công Prompt Injection trong `eval/judge_prompt.md`.
-4. **Scaffolding & Soạn thảo tài liệu**:
-   - Xây dựng candidate pool 15 tổ hợp kiểm thử (`C01`–`C15`), ma trận độ phủ `coverage-matrix.md`, bộ mẫu gán nhãn độc lập và khung báo cáo khoa học 7 mục trong `deliverables/REPORT.md`.
+- **Project**: AI Evaluation Lab (Track 1 Day 20–21)
+- **Repository**: `C:\Users\Huy\Track1_Day21_2A202601873_NguyenQuangHuy`
+- **Decision Owner**: Nguyễn Quang Huy (`2A202601873`)
+- **Collaborator / Annotator**: Lăng Thị Phương Huế (`2A202601915`)
+- **Evaluation Date**: `2026-08-21`
 
 ---
 
-## 2. AI đã sai, hời hợt hoặc có nguy cơ làm mất coverage ở đâu?
+## 1. Phân định Trách nhiệm & Mức độ Hỗ trợ của AI
 
-1. **Nguy cơ suy diễn quy chế thi ảo (V04 Answer-seeking)**:
-   - Ban đầu AI đề xuất kiểm tra quy chế học vụ (academic integrity policy), nhưng qua audit thực tế phát hiện 18 tài liệu corpus không có văn bản quy chế thi cử. Nếu AI tự do sinh câu trả lời, model có thể bịa đặt điều lệ không có trong bài học.
-2. **Sai sót schema ban đầu**:
-   - Trong quá trình viết script audit corpus, AI từng giả định trường `documents` và `path` thay vì đọc đúng schema `docs` và `file` trong `manifest.json`. AI đã tự chẩn đoán và khắc phục bằng cách đọc schema thật.
-3. **Nguy cơ nhập nhằng giữa các chiều (Dimension Overlap)**:
-   - AI từng có nguy cơ gộp `out-of-scope` (ngoài môn học) và `unsupported` (trong môn học nhưng thiếu tài liệu), hoặc gộp `ambiguous` (từ ngữ đa nghĩa) và `referentially underspecified` (thiếu đại từ chỉ định). Phân tích này đã được tách bạch rõ ràng để con người quyết định.
-
----
-
-## 3. Người thực hiện đã tự sửa / quyết định lại những gì?
-
-1. **Khóa định nghĩa hành vi V04**: Nhóm định nghĩa rõ hành vi mong đợi của Tutor khi gặp câu hỏi xin đáp án là: *Đóng vai trò gia sư Socratic, giải thích nguyên lý, hướng dẫn gợi mở, không làm hộ bài thi và không bịa đặt quy chế*.
-2. **Quyết định phân luồng Routing**: Nhóm quyết định giữ ít nhất 6 tiêu chí kiểm tra bằng Code Check để tối ưu chi phí ($0 token) và tính khách quan, chỉ giao việc thẩm định ngữ nghĩa bám nguồn phức tạp cho LLM Judge sau khi đã calibrate.
-3. **Thiết lập Ngưỡng chất lượng khóa trước Run**: Nhóm tự thiết lập các ngưỡng chất lượng (thresholds) mang tính nguyên tắc không thể đánh đổi (`schema 100%`, `citation exists ≥ 95%`, `0 OOS case bị trả lời như in-scope`).
+| Hạng mục công việc | Mức độ AI hỗ trợ | Vai trò của Con người (Huy / Huế) | Bằng chứng kiểm toán (Audit Evidence) |
+|---|---|---|---|
+| **Phase 0: Base Harness & Forensic Audit** | AI hỗ trợ refactor code checks, fix unit tests và audit corpus 341 sections. | Quyết định tiêu chuẩn hóa và phê duyệt baseline kiểm thử. | `deliverables/evidence/current-state-audit.md`, `tests/test_eval_kit.py` (44 pass), `tests/test_code_checks.py` (23 pass). |
+| **Gate 1: Intentional Coverage & Dataset v1** | AI hỗ trợ sinh đề xuất ma trận 15 combinations và 22 scenarios từ corpus. | Huy phê duyệt Checkpoint A (D1-D4), Checkpoint B (C01-C15), Checkpoint C (KEEP 22 scenarios). | `HUMAN-CHECKPOINT-A-APPROVED.md`, `HUMAN-CHECKPOINT-B-APPROVED.md`, `HUMAN-CHECKPOINT-C-PROVENANCE.md`, `dataset-v1.jsonl`. |
+| **Gate 2: Live Traced Run & Human Baseline** | AI thực thi batch run trên model thật, ghi nhận trace lên LangSmith, sinh file pre-review. | Huy và Huế chấm nhãn độc lập trên `report.html`, ghi nhận IAA trước đồng thuận, thảo luận ca `sc-16`. | `results-v3.jsonl`, `labels-huy.csv`, `labels-hue.csv`, `agreement-v1.md`, `disagreement-analysis.md`, `labels.csv`. |
+| **Gate 3: Observable Rubric & Routing Map** | AI hỗ trợ soạn thảo bảng routing và quy tắc nhị phân quan sát được. | Nhóm phê duyệt triết lý "Ưu tiên code checks làm mặc định, dùng judge cho ngữ nghĩa". | `deliverables/evidence/routing-table.md`, `deliverables/REPORT.md` (Sections 3 & 4). |
+| **Gate 4: Code Checks & Judge Calibration** | AI chạy kiểm thử code checks thật, thực hiện 2 vòng calibration LLM judge và phân tích lỗi. | Nhóm phê duyệt định nghĩa ranh giới sư phạm cho Judge Prompt v2. | `code-check-results-v3.md`, `judge-prompt-v1.md`, `judge-prompt-v2.md`, `calibration-1.md`, `calibration-2.md`. |
+| **Gate 5: Locked Thresholds & Slice Scorecard** | AI tính toán bảng điểm chi tiết theo 14 lát cắt dữ liệu. | Huy pre-lock ngưỡng kỹ thuật trước candidate scoring tại `thresholds-locked.md`. | `thresholds-locked.md`, `scorecard-v1.md`. |
+| **Gate 6: PM Report & Release Decision** | AI tổng hợp báo cáo 7 phần chuẩn cấu trúc upstream. | Huy và Huế ký duyệt quyết định phát hành chính thức (`SHIP`). | `deliverables/REPORT.md`, `deliverables/evidence/braintrust-link.md`, `README.md`. |
 
 ---
 
-## 4. Những phần nào hoàn toàn thuộc quyền sở hữu của con người (Human-Owned)?
+## 2. Báo cáo Chi tiết Từng Giai đoạn Tương tác
 
-- **Human Checkpoint A & B**: Quyết định phê duyệt 4 Dimensions, 15 Values và danh sách Combinations cuối cùng.
-- **Phase 2 Baseline Labeling**: Gán nhãn độc lập từng cá nhân (`labels-huy.csv`, `labels-hue.csv`) và phiên thảo luận đồng thuận (`labels.csv`). AI tuyệt đối không gán nhãn thay thành viên.
-- **Phase 6 Verdict Approval**: Quyết định phê duyệt phát hành cuối cùng (`Ship`, `Ship with conditions`, hoặc `Hold`) của sản phẩm.
+1. **Khởi tạo & Khắc phục Lỗi Hạ tầng (Attempt v1 -> Candidate v3)**:
+   - AI phát hiện lỗi 429 quota trên Gemini Free Tier, snapshot raw invalid data thành `results-attempt-v1-invalid.jsonl`.
+   - AI bổ sung Exponential Backoff và delay 3.0s, chuyển cấu hình model sang `gemini/models/gemini-flash-lite-latest`.
+   - AI tích hợp thành công LangSmith Cloud Tracing (HTTP 200).
+
+2. **Cải tiến Kỹ thuật Đảm bảo Chất lượng Sản phẩm (Candidate v1 -> v2 -> v3)**:
+   - Candidate v1: `quote_verbatim` đạt 81.82% do model chèn dấu ba chấm (`...`). AI phân tích nguyên nhân và bổ sung module `ground_verbatim_quote`.
+   - Candidate v2: `quote_verbatim` tăng lên 100%, nhưng xuất hiện duplicate sources (86.36%). AI bổ sung deduplication.
+   - Candidate v3: Đạt **100.00% (22/22)** trên toàn bộ 6 tiêu chí Code Checks.
+
+3. **Gán nhãn Con người & Đo lường Độ đồng thuận (Gate 2)**:
+   - AI chuẩn bị dữ liệu review trực quan trong `report.html` và sinh `labels-ai-review.csv` hỗ trợ con người tra cứu nhanh.
+   - Nguyễn Quang Huy và Lăng Thị Phương Huế chấm độc lập, đạt độ đồng thuận 95.45% (21/22).
+   - Ca bất đồng `sc-16` được đưa vào `disagreement-analysis.md` và giải quyết theo chuẩn Socratic V04.
+
+4. **Hiệu chuẩn LLM Judge (Gate 4)**:
+   - Round 1: Judge v1 đạt 95.45% Agreement (bị 1 false-block trên `sc-01`).
+   - Round 2: Sau khi AI tinh chỉnh `judge-prompt-v2.md` làm rõ ranh giới diễn giải sư phạm, Judge v2 đạt **100.00% Agreement & 100.00% TPR**.

@@ -61,7 +61,7 @@ def judge_row(rec, template, judge_model=None):
     model = judge_model or JUDGE_MODEL
     prompt = build_judge_prompt(rec, template)
     data, latency = tutor.chat([{"role": "user", "content": prompt}],
-                               model=model, max_tokens=500)
+                               model=model, max_tokens=1500)
     content = data["choices"][0]["message"]["content"]
     out = tutor.parse_json_content(content)
     return {"scenario_id": rec["scenario_id"], "verdict": out.get("verdict", "uncertain"),
