@@ -85,6 +85,7 @@ def main():
             rec.update(error=str(e))
             print("LỖI: %s" % e)
         results.append(rec)
+        time.sleep(5)  # Tránh rate limit của model free OpenRouter
 
     with open("results.jsonl", "w", encoding="utf-8") as f:
         for rec in results:
