@@ -1,4 +1,4 @@
-"""Chạy tutor trên toàn bộ dataset -> results.jsonl (kèm latency, tokens, chi phí).
+﻿"""Chạy tutor trên toàn bộ dataset -> results.jsonl (kèm latency, tokens, chi phí).
 
 Cách dùng:  python3 eval/run_eval.py [dataset.jsonl]
 Mặc định đọc dataset.jsonl ở root repo; nếu chưa có thì copy data/dataset.example.jsonl làm mẫu.
@@ -10,6 +10,7 @@ calls, tokens, cost trên app.braintrust.dev / smith.langchain.com). Không có 
 bỏ qua lặng lẽ. Chi tiết trong README.md mục Tracing.
 """
 import json, os, sys, time
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 # tutor.py nằm ở tutor/ (khu vực sản phẩm) — thêm vào sys.path để import được
@@ -37,6 +38,10 @@ def read_jsonl(path):
     with open(path, encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
 
+def get_hcm_iso_time():
+    tz = timezone(timedelta(hours=7))
+    return datetime.now(tz).isoformat()
+
 def main():
     dataset_path = sys.argv[1] if len(sys.argv) > 1 else "dataset.jsonl"
     if not os.path.exists(dataset_path):
@@ -56,8 +61,15 @@ def main():
     for i, row in enumerate(rows, 1):
         q = row["input"]
         print("[%d/%d] %s ... " % (i, len(rows), q[:60]), end="", flush=True)
-        rec = {"scenario_id": row.get("scenario_id") or row.get("id") or "row-%d" % i,
-               "input": q}
+        rec = {
+            "scenario_id": row.get("scenario_id") or row.get("id") or "row-%d" % i,
+            "input": q,
+            "expected_scope": row.get("expected_scope"),
+            "note": row.get("note"),
+            "metadata": row.get("metadata", {}),
+            "model_evaluated": tutor.MODEL,
+            "timestamp": get_hcm_iso_time(),
+        }
         slide = (row.get("metadata") or {}).get("slide")
         if slide:
             rec["slide"] = slide  # giữ lại để judge/report chấm theo đúng bối cảnh

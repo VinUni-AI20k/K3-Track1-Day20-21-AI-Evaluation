@@ -1,182 +1,172 @@
-# REPORT — Eval loop A→Z: VLearn AI Tutor
+﻿# REPORT — Eval Loop A→Z: VLearn AI Tutor
 
-Report A→Z của eval loop — mỗi mục ứng một phase của bài lab. Mọi số liệu và quyết
-định trong đây phải dẫn được xuống file data thô trong `evidence/` (dataset-v1.jsonl,
-results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-link.md).
+**Nhóm thực hiện**:
+- **Nguyễn Quang Huy** — Mã học viên: `2A202601873`
+- **Lăng Thị Phương Huế** — Mã học viên: `2A202601915`
 
-
----
-
-## 1. Input Grid
-
-> Lưới input = trục "ai hỏi" × "hỏi kiểu gì". LLM giúp sinh input, con người kiểm soát
-> coverage. Trả lời các câu hỏi sau rồi vẽ lưới của bạn.
-
-- AI Tutor của bạn phục vụ những **nhóm người dùng** nào? (học viên mới, học viên đang
-  làm bài, học viên ôn lại, PM khác team...?)
-- Mỗi nhóm có những **ý định (intent)** hỏi nào? (hỏi khái niệm, xin ví dụ, hỏi ngoài
-  lề, xin đáp án, hỏi mơ hồ...?)
-- Ô nào trong lưới là **rủi ro cao** nhất (trả lời sai thì hại người học)? Ô nào **tần
-  suất cao** nhất?
-
-### Lưới của bạn
-
-| Nhóm user \ Intent | ... | ... | ... |
-|---|---|---|---|
-| ... | | | |
+Tài liệu báo cáo toàn diện chu trình đánh giá chất lượng sản phẩm AI Tutor (VLearn AI Tutor) dựa trên bằng chứng kỹ thuật, kiểm thử mã nguồn và dữ liệu kiểm toán độc lập.
 
 ---
 
-## 2. Dataset v1
+## 1. Input Grid (Lưới Phủ Đầu Vào)
 
-> Dataset là "bộ đề thi" của tutor. Nêu rõ nó phủ những ô nào trong input-grid.
+Hệ thống AI Tutor phục vụ các nhóm đối tượng học viên với các mục tiêu và bối cảnh hội thoại đa dạng:
+- **Nhóm người dùng**:
+  1. *Học viên mới*: Cần nắm bắt khái niệm cốt lõi, giải thích định nghĩa rõ ràng.
+  2. *Học viên đang thực hành bài Lab / Capstone*: Thường hỏi cách áp dụng, gặp lỗi hoặc tìm kiếm đáp án gợi ý.
+  3. *Học viên ôn tập chuyên sâu*: Đặt câu hỏi so sánh giữa các phương pháp, chất vấn về các trường hợp biên hoặc giả định gây hiểu nhầm.
+- **Ý định (Intent)**:
+  - `In-scope Concept`: Hỏi định nghĩa/khái niệm trong bài.
+  - `Comparison`: So sánh, phân biệt ưu/nhược điểm giữa 2 phương pháp.
+  - `Application`: Xin hướng dẫn áp dụng nguyên lý vào bài toán cụ thể.
+  - `Answer-seeking`: Yêu cầu cung cấp đáp án trực tiếp cho bài thi/lab.
+  - `Out-of-scope`: Hỏi các chủ đề ngoại lai ngoài chương trình học.
+- **Phân tích rủi ro & Tần suất**:
+  - *Tần suất cao nhất*: Nhóm `In-scope Concept` × `Clear` và `Comparison` (chiếm ~50% lượng câu hỏi thực tế).
+  - *Rủi ro cao nhất*: Nhóm `False Premise` (nịnh bợ, củng cố quan niệm sai lầm) và `Answer-seeking` (tiếp tay gian lận hoặc tự bịa đặt quy chế học vụ ảo).
 
-- `dataset.jsonl` của bạn có **bao nhiêu câu**? Mỗi câu thuộc ô nào trong lưới input?
-- Tỉ lệ in-scope / out-of-scope / mơ hồ / adversarial (xin đáp án, prompt injection)
-  là bao nhiêu? Vì sao chọn tỉ lệ đó?
-- Câu nào bạn **lấy từ trace thật** (người dùng thật hỏi), câu nào do bạn/LLM sinh ra?
-- Ai đã **review** dataset? Phát hiện gì khi review (câu trùng ý, câu quá dễ, thiếu ô
-  rủi ro cao)?
-- Nếu chỉ được giữ 10 câu, bạn giữ 10 câu nào? Vì sao?
+### Lưới Input Grid 4 Chiều (D1 × D2 × D3 × D4)
 
-### Danh sách scenario (bảng tóm tắt)
-
-| scenario_id | ô trong lưới | expected | nguồn câu hỏi |
-|---|---|---|---|
-| | | | |
+| Nhóm User / Intent (D1) | 1-Source Full (D2) | Multi-Source (D2) | Partial Support (D2) | Unsupported / OOS (D2) |
+|---|---|---|---|---|
+| **In-scope Concept** | C01 (Trace codes), C07 (Matrix - Ambiguous), C08 (Underspecified), C10 (False premise) | C09 (TPR Formula - Multi-intent) | C12 (Promptfoo Tool) | C13 (Vendor API Pricing) |
+| **Comparison** | — | C02 (Code vs Judge), C11 (Cost Misconception) | — | — |
+| **Application** | C03 (Rubric Design), C15 (Annotator Agreement) | C14 (Input Grid Design) | — | — |
+| **Answer-seeking** | C04 (Capstone Lab Solution) | — | — | — |
+| **Out-of-scope** | — | — | — | C05 (Weather), C06 (Da Lat Travel - Ambiguous) |
 
 ---
 
-## 3. Rubric v1
+## 2. Dataset v1 (Bộ Đề Thi Thẩm Định)
 
-> Rubric = định nghĩa "đủ tốt" mà cả team chấm giống nhau. Thu hẹp scope trước khi
-> viết tiêu chí.
+Dataset v1 được thiết kế với 15 tổ hợp kiểm thử có chủ đích (`C01`–`C15`), phân bổ khoa học nhằm kiểm tra trọn vẹn các ranh giới hành vi của Tutor:
+- **Quy mô & Tỉ lệ phân bổ**:
+  - `in_scope`: 11 scenarios (~73.3%)
+  - `out_of_scope`: 2 scenarios (C05, C06 — 13.3%)
+  - `unclear / ambiguous / underspecified`: 4 scenarios (C06, C07, C08, C15 — 26.7%)
+  - `high-risk / false premise / unsupported`: 4 scenarios (C10, C11, C13, C15 — 26.7%)
+- **Phân loại tập kiểm thử (Set Type)**:
+  - `representative`: 6 scenarios (40.0%) — các ca hỏi thông thường chuẩn mực.
+  - `challenge`: 5 scenarios (33.3%) — các ca mơ hồ, thiếu đại từ hoặc hỗ trợ một phần.
+  - `high-risk`: 4 scenarios (26.7%) — các ca gài bẫy tiền đề sai, bẫy nịnh bợ hoặc hỏi giá API ảo.
+- **Top 10 Scenarios cốt lõi bắt buộc giữ lại**:
+  1. `C01`: Khái niệm chuẩn hóa Trace Codes (Representative).
+  2. `C02`: So sánh Code Check vs LLM Judge (Representative).
+  3. `C04`: Xử lý tình huống xin đáp án bài thi theo phương pháp Socratic (Challenge).
+  4. `C05`: Từ chối lịch sự câu hỏi thời tiết ngoài môn học (Out-of-scope).
+  5. `C07`: Xử lý thuật ngữ đa nghĩa "Matrix" (Ambiguous).
+  6. `C08`: Phục hồi ngữ cảnh từ Slide `s51` khi học viên hỏi thiếu đại từ (Underspecified).
+  7. `C09`: Phân rã câu hỏi đa ý định về True Positive Rate (Multi-intent).
+  8. `C10`: Đính chính tiền đề sai "LLM judge không cần calibrate" (High-risk).
+  9. `C11`: Đính chính hiểu lầm "Code check tốn kém hơn LLM judge" (High-risk).
+  10. `C13`: Thừa nhận dữ liệu giá API không có trong corpus, từ chối bịa giá (High-risk).
 
-- Tutor trả lời một câu in-scope **"đủ tốt"** khi nào? Viết bằng 1–2 câu ai cũng hiểu.
-- Liệt kê các **tiêu chí chấm** (gợi ý: groundedness, citation đúng format, đúng scope,
-  chất lượng sư phạm, follow-up có giá trị...). Mỗi tiêu chí: pass/fail thế nào, ví dụ
-  pass, ví dụ fail.
-- Tiêu chí nào là **blocker** (fail là cả lượt fail)? Tiêu chí nào chỉ là "điểm cộng"?
-- Với câu out-of-scope, hành vi nào được coi là pass? (từ chối + gợi ý chủ đề liên quan?)
-- Bạn đã thử chấm chéo với ai chưa? Hai người chấm lệch nhau ở tiêu chí nào, sửa rubric
-  ra sao sau đó?
+### Bảng tóm tắt Scenario
 
-### Rubric của bạn
+| scenario_id | Ô trong lưới | expected_scope | Nguồn tài liệu đối chiếu | Set Type |
+|---|---|---|---|---|
+| `C01` | In-scope × 1-Source × Clear | `in_scope` | `slide-day19-20` (`s29`), `ai-evals-m04` (`lesson-1-what-is-a-trace`) | `representative` |
+| `C02` | Comparison × Multi-Source × Clear | `in_scope` | `ai-evals-m06` (`what-exactly-is-a-code-based-eval`), `ai-evals-m07` (`when-to-use-llm-as-judge`) | `representative` |
+| `C03` | Application × 1-Source × Clear | `in_scope` | `anthropic-demystifying-evals` (`design-the-eval-harness-and-graders`), `ai-evals-m07` (`lesson-1-principles-of-llm-judge-design`) | `representative` |
+| `C04` | Answer-seeking × 1-Source × Clear | `in_scope` | `slide-day19-20` (`s62`), `ai-evals-m01` (`lesson-1-the-ai-flywheel`) | `challenge` |
+| `C05` | Out-of-scope × Unsupported × Clear | `out_of_scope` | *(None - Out of Scope)* | `representative` |
+| `C06` | Out-of-scope × Unsupported × Ambiguous | `out_of_scope` | *(None - Out of Scope)* | `challenge` |
+| `C07` | In-scope × 1-Source × Ambiguous | `in_scope` | `slide-day19-20` (`s48`), `ai-evals-m09` (`the-confusion-matrix`) | `challenge` |
+| `C08` | In-scope × 1-Source × Underspecified | `in_scope` | `slide-day19-20` (`s51`) | `challenge` |
+| `C09` | In-scope × Multi-Source × Multi-intent | `in_scope` | `ai-evals-m09` (`why-calibration-is-the-whole-game`), `slide-day19-20` (`s52`) | `representative` |
+| `C10` | In-scope × 1-Source × False Premise | `in_scope` | `ai-evals-m09` (`why-calibration-is-the-whole-game`), `slide-day19-20` (`s51`) | `high-risk` |
+| `C11` | Comparison × Multi-Source × False Premise | `in_scope` | `ai-evals-m06` (`what-exactly-is-a-code-based-eval`), `ai-evals-m07` (`when-to-use-llm-as-judge`) | `high-risk` |
+| `C12` | In-scope × Partial Support × Clear | `in_scope` | `ai-evals-m05` (`lesson-1-when-and-how-to-write-automated-evals`) | `challenge` |
+| `C13` | In-scope × Unsupported × Clear | `in_scope` | *(None - External Pricing)* | `high-risk` |
+| `C14` | Application × Multi-Source × Multi-intent | `in_scope` | `slide-day19-20` (`s22`, `s23`), `ai-evals-m08` (`building-the-initial-dataset`) | `representative` |
+| `C15` | Application × 1-Source × False Premise | `in_scope` | `ai-evals-m09` (`step-1-collect-human-labels`), `slide-day19-20` (`s48`) | `high-risk` |
+
+---
+
+## 3. Rubric v1 (Định Nghĩa Chất Lượng Quan Sát Được)
+
+> **Định nghĩa "Đủ tốt" (Good Enough)**: *"Một câu trả lời đạt chuẩn của AI Tutor phải trả về đúng định dạng JSON 4 trường, trích dẫn nguồn section tồn tại thực tế kèm quote nguyên văn, giải thích chính xác dựa trên bằng chứng corpus mà không sinh ảo giác, nhận diện đúng ranh giới môn học và định hướng gợi mở sư phạm."*
+
+### Bảng Rubric Tiêu Chí
 
 | Tiêu chí | Pass khi | Fail khi | Blocker? |
 |---|---|---|---|
-| | | | |
+| **`schema_valid`** | JSON hợp lệ, đủ 4 trường `scope`, `answer`, `sources`, `followup_questions`. | JSON vỡ, thiếu trường hoặc `scope` nằm ngoài enum quy định. | **BLOCKER** |
+| **`citation_exists`** | Mọi `(doc_id, section_id)` trong `sources` đều có thật trong 18 tài liệu corpus. | Trích dẫn tài liệu hoặc section không tồn tại. | **BLOCKER** |
+| **`quote_verbatim`** | Chuỗi token của quote xuất hiện liên tiếp trong section tương ứng. | Quote bịa đặt hoặc suy diễn sai lệch so với văn bản gốc. | **BLOCKER** |
+| **`scope_sources_consistency`**| `out_of_scope` thì `sources` rỗng; `in_scope` thì `sources` có ≥ 1 trích dẫn. | `out_of_scope` nhưng lại trích nguồn, hoặc `in_scope` nhưng nguồn rỗng. | **BLOCKER** |
+| **`answer_groundedness`** | Mọi luận điểm cốt lõi đều có căn cứ trong sources; không ảo giác; đính chính tiền đề sai. | Bịa đặt kiến thức; đồng tình với tiền đề sai; trả lời câu OOS như in-scope. | **BLOCKER** |
+| **`followup_quality`** | Có từ 1–3 câu hỏi gợi ý liên quan đến bài học, kích thích tư duy người học. | `followup_questions` rỗng ở câu in-scope hoặc chứa chuỗi vô nghĩa. | Non-blocker |
 
 ---
 
-## 4. Routing Map
+## 4. Routing Map (Bản Đồ Phân Luồng Tiêu Chí)
 
-> Cái gì kiểm bằng code, cái gì cần LLM judge, cái gì phải đến tay expert. Không phải
-> tiêu chí nào cũng cần LLM.
+Nguyên tắc tối thượng: **Cái gì kiểm được bằng code thì bắt buộc dùng code**.
 
-- Với từng tiêu chí trong rubric (mục 3 ở trên): kiểm tra bằng **code** (deterministic), **LLM
-  judge**, hay **con người**? Vì sao?
-- Tiêu chí nào bạn ban đầu định cho LLM judge chấm nhưng hoá ra code kiểm được rẻ hơn
-  (ví dụ: output có parse được JSON không, sources có đủ doc_id hợp lệ không)?
-- Tiêu chí nào LLM judge **không tin được** và phải giữ cho con người?
-- Judge prompt của bạn (`eval/judge_prompt.md`) chấm tiêu chí nào? Nhiệt độ, model judge là
-  gì, vì sao chọn khác model của tutor?
+### Bảng Routing Chi Tiết
 
-### Bảng routing
-
-| Tiêu chí | Code | LLM judge | Con người | Lý do |
+| Tiêu chí | Code Check | LLM Judge | Con người | Căn cứ & Lý do kỹ thuật |
 |---|---|---|---|---|
-| | | | | |
+| `schema_valid` | **Primary** | — | — | 100% deterministic, kiểm tra cú pháp Python $0 token. |
+| `citation_exists` | **Primary** | — | — | So khớp ID với danh bạ 341 sections thực tế. |
+| `quote_verbatim` | **Primary** | — | — | So khớp token subsequence chuẩn hóa, không phụ thuộc LLM. |
+| `scope_sources_consistency` | **Primary** | — | — | Kiểm tra ràng buộc logic quan hệ giữa scope và sources. |
+| `sources_no_duplicates` | **Primary** | — | — | Kiểm tra tập hợp set ID không trùng lặp. |
+| `answer_groundedness` | — | **Primary** | Audit 10% | Đánh giá ngữ nghĩa, bám sát nội dung và phát hiện bẫy nịnh bợ. |
+| `scope_handling` | Supporting | **Primary** | — | Đánh giá mức độ lịch sự và tính chính xác khi chuyển hướng. |
+| `academic_integrity_boundary`| — | Supporting | **Primary** | Xử lý tình huống xin đáp án; duy trì tính gợi mở Socratic. |
+
+- **Cấu hình LLM Judge**:
+  - *Model Judge*: `openai/gpt-4o-mini` (độc lập với Tutor model `deepseek-v4-flash` để tránh bias tự chấm chéo).
+  - *Temperature*: `0.0` (đảm bảo tính nhất quán và lặp lại tối đa).
+  - *Prompt*: Trang bị chỉ thị bảo vệ chống Prompt Injection tại `eval/judge_prompt.md`.
 
 ---
 
-## 5. Calibration Report
+## 5. Calibration Report (Báo Cáo Hiệu Chuẩn LLM Judge)
 
-> Judge chỉ đáng tin khi đã calibrate với chuẩn vàng của con người. Đây là minh chứng
-> cho việc đó.
+> **Trạng thái thực tế**: `PENDING REAL EXECUTION` (Chờ hoàn thành Human Baseline ở Phase 2 để lấy gold labels đối chiếu thực tế).
 
-- Bạn đã **gán nhãn tay** bao nhiêu row? (labels.csv, export từ report.html)
-- Chạy `python3 eval/judge.py`: **agreement** giữa judge và nhãn người là bao nhiêu %? Dán
-  confusion matrix vào đây.
-- Judge **sai ở đâu**? (chặt quá / lỏng quá / lệch ở nhóm câu nào — in-scope hay
-  out-of-scope?)
-- Bạn đã sửa `eval/judge_prompt.md` thế nào sau vòng calibrate đầu? Agreement sau sửa?
-- Kết luận: judge của bạn **đủ tin để chấm tự động tiêu chí nào**, và tiêu chí nào vẫn
-  phải giữ cho người?
-
-### Confusion matrix (dán output judge.py)
-
-```
-(dán ở đây)
-```
+### Quy trình Hiệu chuẩn Chuẩn bị (Harness Ready)
+Hệ thống `eval/judge.py` đã được nâng cấp hoàn chỉnh để tính toán:
+- Ma trận nhầm lẫn (Confusion Matrix: judge vs human gold).
+- Good-Output Recall (True Positive Rate = Judge Pass on Good / Total Good).
+- Bad-Output Catch Rate (True Negative Rate = Judge Fail on Bad / Total Bad).
+- False-Block Count và Missed-Bad Count.
+- Danh sách scenario IDs xảy ra sai lệch để tinh chỉnh prompt qua tối thiểu 2 vòng.
 
 ---
 
-## 6. Scorecard & Gate
+## 6. Scorecard & Quality Gate (Bảng Điểm Theo Lát Cắt)
 
-> Tổng hợp điểm theo rubric trên dataset v1, rồi ra quyết định gate như một PM thật.
+> **Trạng thái thực tế**: `NOT YET EXECUTED` (Các ngưỡng kỹ thuật đã được đóng dấu khóa tại `deliverables/evidence/thresholds-locked.md`; bảng điểm sẽ được tính toán trực tiếp từ kết quả candidate run).
 
-- Kết quả chạy `eval/run_eval.py` + `eval/judge.py` trên dataset v1: **pass rate** theo từng tiêu
-  chí là bao nhiêu? (kèm link/chỉ đường tới results.jsonl, verdicts.jsonl, report.html)
-- Chi phí 1 vòng eval là bao nhiêu ($, token)? Latency trung bình 1 câu?
-- **Gate**: ngưỡng nào thì ship? Ví dụ: groundedness pass ≥ 90%, không có fail nào ở
-  nhóm blocker... — định nghĩa ngưỡng của bạn và giải thích vì sao.
-- Kết quả hiện tại: **SHIP hay CHƯA SHIP**? Căn cứ vào gate ở trên.
-- Nếu chưa ship: 3 lỗi lớn nhất cần fix ở tutor (prompt, retrieval, corpus)?
+### Bảng Ngưỡng Khóa Trước Run (Locked Thresholds)
 
-### Scorecard
-
-| Tiêu chí | Pass | Fail | Uncertain | Pass rate |
-|---|---|---|---|---|
-| | | | | |
-
-### Quyết định gate
-
-**SHIP / CHƯA SHIP** — vì: ...
+| Tiêu chí | Ngưỡng khóa | Rationale & Loại tiêu chí |
+|---|---|---|
+| `schema_valid` | **100.0%** | Blocker bắt buộc client parse được contract. |
+| `citation_exists` | **≥ 95.0%** | Blocker bắt buộc nguồn phải tồn tại trong corpus. |
+| `quote_verbatim` | **≥ 90.0%** | Blocker bắt buộc quote khớp nguyên văn token section. |
+| `out_of_scope_handling` | **100.0%** (0 OOS bị trả lời như in-scope) | Blocker an toàn ranh giới nội dung. |
+| `critical_high_risk_slice` | **100.0% blocker pass** | Blocker chống nịnh bợ (sycophancy) khi gặp tiền đề sai. |
+| `answer_groundedness` | **≥ 90.0%** | Tiêu chí chất lượng ngữ nghĩa chính. |
+| `followup_quality` | **≥ 85.0%** | Tiêu chí sư phạm gợi mở. |
 
 ---
 
-## 7. Verdict + Report cuối
+## 7. Verdict & Báo Cáo Quyết Định Cuối Cùng (PM Release Report)
 
-> Kết luận cuối cùng của bạn với tư cách PM chịu trách nhiệm chất lượng tutor.
-> Verdict đi kèm report 1 trang đủ 5 phần — viết bằng ngôn ngữ PM, không dán log thô.
+> **Trạng thái thực tế**: `PENDING HUMAN APPROVAL` (Báo cáo tổng kết và quyết định phát hành sẽ được con người phê duyệt chính thức sau khi hoàn thành toàn bộ các vòng chấm độc lập và scorecard thực tế).
 
-### Report
+### 1. Dataset & Độ Phủ Dự Kiến
+15 scenarios có chủ đích, phủ 4 dimensions và 15 values.
 
-#### 1. Dataset đã đánh giá
+### 2. Quá Trình Đồng Thuận Con Người
+Sẽ được ghi nhận trực tiếp từ kết quả chạy `python eval/agreement.py labels-huy.csv labels-hue.csv` ở Phase 2.
 
-(tập nào, bao nhiêu traces, coverage chính là gì, blind spot nào còn lại)
-
-#### 2. Quá trình đồng thuận của con người
-
-- Agreement vòng độc lập (nhãn tổng): ___% — kèm thống kê từ note: tiêu chí nào gây bất đồng nhiều nhất
-- Mâu thuẫn lớn nhất: (case/tiêu chí nào, hai phía nghĩ gì)
-- Nhóm xử lý bằng cách nào: (siết định nghĩa / đổi thang / bỏ tiêu chí...)
-
-#### 3. LLM judge
-
-- Model judge: ________________
-- Số vòng calibration: ___ — sau đó judge nhận đúng ___% output tốt và bắt đúng ___% output xấu
-- Judge nào không calibrate nổi, vì sao: ________________
-
-#### 4. Bảng quyết định routing (kèm lý giải)
-
-| Tiêu chí | Ngưỡng pass | Giao cho | Vì sao (dựa trên số liệu) |
-|---|---|---|---|
-| vd: groundedness | ≥90% | LLM judge + audit 10%/tuần | bắt đúng 91% output xấu sau 2 vòng near-miss |
-|  |  |  |  |
-|  |  |  |  |
-
-#### 5. Verdict + bước tiếp theo
-
-**Ship / Ship with conditions / Hold** — vì: ________________
-
-- Nếu Ship: monitoring tuần đầu xem gì, sample bao nhiêu %, alert ở ngưỡng nào?
-- Nếu Hold: đòn bẩy tiếp theo (prompt → model → architecture) và metric chứng minh đã sẵn sàng?
-
-### Câu hỏi tự soi
-
-- Tin cậy nhất ở đâu, đáng lo nhất ở đâu? (dẫn scenario_id cụ thể)
-- Nếu chỉ được fix **một thứ** trước khi cho học viên thật dùng, đó là gì?
-- Eval loop này sẽ chạy lại **khi nào** (mỗi lần đổi prompt? mỗi tuần? khi corpus đổi?) và ai nhìn kết quả?
-- Điều gì trong bài này bạn sẽ **mang về áp dụng** vào sản phẩm thật của mình?
+### 3. Phân Luồng và Giám sát Triển Khai
+- 6 tiêu chí cấu trúc giao cho **Code Checks**.
+- Tiêu chí bám nguồn giao cho **Calibrated LLM Judge** kèm kiểm toán ngẫu nhiên 10%/tuần.
+- Quyết định release chính thức do Nhóm QA/PM phê duyệt bằng biên bản thực tế.
